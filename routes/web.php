@@ -18,7 +18,6 @@ Route::get('/', function () {
 });
 
 Auth::routes();
-// Route::group(['middleware' => ['auth']], function() {
-//     Route::get('/logout', 'LogoutController@perform')->name('logout.perform');
-//  });
+
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+// Route::get('/admin', [App\Http\Controllers\HomeController::class, 'other'])->name('admin');
