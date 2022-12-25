@@ -24,11 +24,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
-        if ($user->role == 'admin') {
-            return view('admin');
-        } else {
-            return view('home');
-        }
+        //IF admin access , add one extra button call "Admin Portal" in Navbar
+        return view('home');
+
     }
 }
