@@ -13,11 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('courts', function (Blueprint $table) {
+        Schema::create('anonymous', function (Blueprint $table) {
             $table->id();
-            $table->string('number')->nullable();
-            $table->string('type_floor')->nullable();//grass|cement
-            $table->string('hour_rate')->nullable();
+            $table->string('device')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('courts');
+        Schema::dropIfExists('anonymous');
     }
 };

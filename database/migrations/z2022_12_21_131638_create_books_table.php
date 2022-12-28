@@ -16,10 +16,11 @@ return new class extends Migration
         //booking -- refer to schema laravel docs
         Schema::create('books', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('court_id')->constrained('courts');
-            $table->foreignId('user_id')->constrained('users');
-            $table->string('state')->default('empty'); //Booked|Empty
-            $table->string('time_book')->unique()->nullable(); // 9am-11pm times... book eg: 9am = 09
+            $table->foreignId('court_id')->nullable()->constrained('courts');
+            $table->foreignId('user_id')->nullable()->constrained('users');
+            $table->foreignId('anonymous_id')->nullable()->constrained('anonymous');
+            $table->enum('state',['empty','booked'])->default('empty')->comment('booked|empty');
+            $table->string('time_book')->unique()->nullable(); // 9am-11pm times... book eg: 9am.(date) = 09.10-10-21
             $table->timestamps();
         });
     }

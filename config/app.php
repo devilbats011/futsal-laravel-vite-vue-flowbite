@@ -14,7 +14,7 @@ return [
     | any other location as required by the application or its packages.
     |
     */
-    'tag' => 'patch.v.2',
+    'tag' => 'p.v.3', //? p = patch | v = version
 
     'name' => env('APP_NAME', 'Laravel'),
 
@@ -70,7 +70,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Kuala_Lumpur', # 'UTC +8',
 
     /*
     |--------------------------------------------------------------------------

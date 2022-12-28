@@ -18,4 +18,18 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+     public function testBookOneHourCourt1At_9amTo_10amClashWithOtherBook()
+     {
+         $this->assertTrue(true);
+     }
+
+     public function testBookTwoHoursCourt1At_11amTo_1pm()
+     {
+         $this->assertTrue(true);
+     }
+
+     public function testBookTwoCourt1At_9amTo_10amWithDifferentDate() {
+         $this->assertTrue(true);
+     }
 }

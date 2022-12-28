@@ -18,8 +18,8 @@
     export default {
         props: {
             test: {
-                type: Object,
-                default: {}
+                type: String,
+                default: 'default-'
             },
         },
         mounted() {
