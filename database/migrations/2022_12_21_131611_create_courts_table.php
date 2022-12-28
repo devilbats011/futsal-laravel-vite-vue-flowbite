@@ -15,6 +15,9 @@ return new class extends Migration
     {
         Schema::create('courts', function (Blueprint $table) {
             $table->id();
+            $table->string('number')->nullable();
+            $table->string('type_floor')->nullable();//grass|simen
+            $table->string('hour_rate')->nullable();
             $table->timestamps();
         });
     }

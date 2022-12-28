@@ -18,7 +18,7 @@ import loginComponent from "./components/Login.vue";
 const app = createApp({});
 const route = () => {
     let url = window.location.pathname;
-    console.log(url); //temporary..
+    // console.log(url); //temporary..
 
     let URLS_ROUTE = [];
     URLS_ROUTE["login"] = { pathname: "/login" };
