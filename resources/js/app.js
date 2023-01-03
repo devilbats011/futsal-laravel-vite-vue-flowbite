@@ -9,11 +9,9 @@ import "flowbite";
 import { createApp } from "vue";
 import defaultComponent from "./components/ExampleComponent.vue";
 import loginComponent from "./components/Login.vue";
-/**
- * Next, we will create a fresh Vue application instance. You may then begin
- * registering components with the application instance so they are ready
- * to use in your application's views. An example is included for you.
- */
+import courtComp from "./components/Courts.vue";
+import bookListComp from "./components/BookList.vue";
+import bookComp from "./components/Book.vue";
 
 const app = createApp({});
 const route = () => {
@@ -37,6 +35,10 @@ const route = () => {
             app.component(componentName, defaultComponent);
             break;
     }
+
+    app.component('courts',courtComp);
+    app.component('book-list',bookListComp);
+    app.component('book',bookComp);
 };
 
 route();

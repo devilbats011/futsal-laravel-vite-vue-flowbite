@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::controller(App\Http\Controllers\BookController::class)->group(function () {
+        Route::get('/books','apiBooks')->name('api.books');
+        Route::post('/books/admin','apiAdminBooks')->name('api.books.admin');
+
+});
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

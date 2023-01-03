@@ -19,8 +19,12 @@ return new class extends Migration
             $table->foreignId('court_id')->nullable()->constrained('courts');
             $table->foreignId('user_id')->nullable()->constrained('users');
             $table->foreignId('anonymous_id')->nullable()->constrained('anonymous');
-            $table->enum('state',['empty','booked'])->default('empty')->comment('booked|empty');
-            $table->string('time_book')->unique()->nullable(); // 9am-11pm times... book eg: 9am.(date) = 09.10-10-21
+            $table->enum('state',['empty','pending','booked'])->default('empty')->comment('booked|pending|empty');
+            $table->string('book_number')->nullable();
+            $table->string('book_date')->nullable();
+            $table->string('time_book_start')->nullable(); //start eg: 9am
+            $table->string('time_book_end')->nullable(); //end eg :11am
+            //start 9am - end 11 am
             $table->timestamps();
         });
     }

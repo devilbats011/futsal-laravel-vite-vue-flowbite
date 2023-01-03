@@ -1,7 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.play')
 
-@section('content')
-<div class="container px-5">
+@section('content-play')
+<div class="container px-5 pt-3">
     <ul class="navbar-nav ms-auto">
         <!-- Authentication Links -->
         @guest
@@ -17,10 +17,10 @@
                 </li>
             @endif
         @else
-            <li class="nav-item dropdown">
-                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+            <li class="nav-item">
+                <div id="navbarDropdown" class="" aria-haspopup="true" aria-expanded="false" v-pre>
                    name: {{ Auth::user()->name }} | role: {{Auth::user()->role}}
-                </a>
+                </div>
 
                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="{{ route('logout') }}"
@@ -37,21 +37,10 @@
         @endguest
     </ul>
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Dashboard') }}| USER </div>
+        <p>
+            {{ __('You are logged in!') }}
+        </p>
 
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-
-                    {{ __('You are logged in!') }}
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 @endsection

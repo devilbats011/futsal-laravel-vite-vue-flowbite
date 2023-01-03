@@ -15,6 +15,8 @@ return new class extends Migration
     {
         Schema::create('anonymous', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->nullable();
+            $table->string('phone_no')->nullable();
             $table->string('device')->nullable();
             $table->timestamps();
         });

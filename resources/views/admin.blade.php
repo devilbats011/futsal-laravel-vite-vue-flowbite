@@ -1,57 +1,50 @@
-@extends('layouts.app')
+@extends('layouts.play')
 
-@section('content')
-<div class="container px-5">
-    <ul class="navbar-nav ms-auto">
-        <!-- Authentication Links -->
-        @guest
-            @if (Route::has('login'))
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                </li>
-            @endif
+@section('content-play')
+    <section class="container p-5">
+        <div class="navbar-nav ms-auto">
 
-            @if (Route::has('register'))
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                </li>
-            @endif
-        @else
-            <li class="nav-item dropdown">
-                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                   name: {{ Auth::user()->name }} | role: {{Auth::user()->role}} | FOR ADMIN ONLY~
-                </a>
+         <p>name: {{ Auth::user()->name }} | role: {{ Auth::user()->role }} | FOR ADMIN ONLY~</p>
+            <!-- Authentication Links -->
+            @guest
+                @if (Route::has('login'))
+                    <div class="nav-item">
+                        <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                    </div>
+                @endif
 
-                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="{{ route('logout') }}"
-                       onclick="event.preventDefault();
-                                     document.getElementById('logout-form').submit();">
-                        {{ __('Logout') }}
-                    </a>
+                @if (Route::has('register'))
+                    <div class="nav-item">
+                        <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                    </div>
+                @endif
+            @else
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        {{-- <div class="card border">
+                            <div class="card-header">{{ __('Dashboard') }} | ADMIN </div>
+                            <div class="card-body">
+                                @if (session('status'))
+                                    <div class="alert alert-success" role="alert">
+                                        {{ session('status') }}
+                                    </div>
+                                @endif
+                                {{ __('You are logged in!') }}
+                            </div>
+                        </div> --}}
 
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                        @csrf
-                    </form>
-                </div>
-            </li>
-        @endguest
-    </ul>
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Dashboard') }} | ADMIN </div>
+                        {{-- border-b --}}
 
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
+                        @include('components.admin-tabs')
+                        <hr class="">
+                        <div class="nav-item dropdown my-3">
+                          @include('components.track')
                         </div>
-                    @endif
-
-                    {{ __('You are logged in!') }}
+                    </div>
                 </div>
-            </div>
+
+            @endguest
         </div>
-    </div>
-</div>
+
+    </section>
 @endsection
