@@ -1,19 +1,7 @@
-<!DOCTYPE html>
-<html>
+@extends('layouts.play')
 
-<head>
-    <title>Laravel 9 Stripe Payment Gateway Integration Example - LaravelTuts.com</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-</head>
-<style type="text/css">
-    h2 {
-        margin: 80px auto;
-    }
-</style>
-
-<body>
-    <div class="container">
+@section('content-play')
+    {{-- <div class="container">
 
         <h2 class="text-center">Laravel 9 Stripe Payment Gateway Integration Example - LaravelTuts.com</h2>
 
@@ -89,79 +77,95 @@
             </div>
         </div>
 
-    </div>
+    </div> --}}
 
-</body>
 
-<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+    {{-- V3 --}}
+    <section class="m-5">
+        <!-- Use action="/create-checkout-session.php" if your server is PHP based. -->
+        <form action="/create-checkout-session" method="POST">
+            @csrf
+            <button type="submit">Checkout</button>
+        </form>
+        @push('scripts')
+            {{-- <script type="text/javascript" src="https://js.stripe.com/v2/"></script> --}}
+            <script src="https://js.stripe.com/v3/"></script>
+            <script type="text/javascript">
+                var stripe = Stripe('pk_test_3pATxw9SDqXlqLsiJiTML92x');
+                var elements = stripe.elements({
+                    clientSecret: 'pi_1FdzqcJWVUQxk1bYUq9TGPd1_secret_v8vRm1D9Cp0kFWmSNgRcdcmHQ',
+                });
+                var paymentElement = elements.create('payment');
+                paymentElement.mount('#payment-element');
+            </script>
+            {{-- <script type="text/javascript">
+                $(function() {
 
-<script type="text/javascript">
-    $(function() {
+                    /*------------------------------------------
+                    --------------------------------------------
+                    Stripe Payment Code
+                    --------------------------------------------
+                    --------------------------------------------*/
 
-        /*------------------------------------------
-        --------------------------------------------
-        Stripe Payment Code
-        --------------------------------------------
-        --------------------------------------------*/
+                    var $form = $(".require-validation");
 
-        var $form = $(".require-validation");
+                    $('form.require-validation').bind('submit', function(e) {
+                        var $form = $(".require-validation"),
+                            inputSelector = ['input[type=email]', 'input[type=password]',
+                                'input[type=text]', 'input[type=file]',
+                                'textarea'
+                            ].join(', '),
+                            $inputs = $form.find('.required').find(inputSelector),
+                            $errorMessage = $form.find('div.error'),
+                            valid = true;
+                        $errorMessage.addClass('hide');
 
-        $('form.require-validation').bind('submit', function(e) {
-            var $form = $(".require-validation"),
-                inputSelector = ['input[type=email]', 'input[type=password]',
-                    'input[type=text]', 'input[type=file]',
-                    'textarea'
-                ].join(', '),
-                $inputs = $form.find('.required').find(inputSelector),
-                $errorMessage = $form.find('div.error'),
-                valid = true;
-            $errorMessage.addClass('hide');
+                        $('.has-error').removeClass('has-error');
+                        $inputs.each(function(i, el) {
+                            var $input = $(el);
+                            if ($input.val() === '') {
+                                $input.parent().addClass('has-error');
+                                $errorMessage.removeClass('hide');
+                                e.preventDefault();
+                            }
+                        });
 
-            $('.has-error').removeClass('has-error');
-            $inputs.each(function(i, el) {
-                var $input = $(el);
-                if ($input.val() === '') {
-                    $input.parent().addClass('has-error');
-                    $errorMessage.removeClass('hide');
-                    e.preventDefault();
-                }
-            });
+                        if (!$form.data('cc-on-file')) {
+                            e.preventDefault();
+                            Stripe.setPublishableKey($form.data('stripe-publishable-key'));
+                            Stripe.createToken({
+                                number: $('.card-number').val(),
+                                cvc: $('.card-cvc').val(),
+                                exp_month: $('.card-expiry-month').val(),
+                                exp_year: $('.card-expiry-year').val()
+                            }, stripeResponseHandler);
+                        }
 
-            if (!$form.data('cc-on-file')) {
-                e.preventDefault();
-                Stripe.setPublishableKey($form.data('stripe-publishable-key'));
-                Stripe.createToken({
-                    number: $('.card-number').val(),
-                    cvc: $('.card-cvc').val(),
-                    exp_month: $('.card-expiry-month').val(),
-                    exp_year: $('.card-expiry-year').val()
-                }, stripeResponseHandler);
-            }
+                    });
 
-        });
+                    /*------------------------------------------
+                    --------------------------------------------
+                    Stripe Response Handler
+                    --------------------------------------------
+                    --------------------------------------------*/
+                    function stripeResponseHandler(status, response) {
+                        if (response.error) {
+                            $('.error')
+                                .removeClass('hide')
+                                .find('.alert')
+                                .text(response.error.message);
+                        } else {
+                            /* token contains id, last4, and card type */
+                            var token = response['id'];
 
-        /*------------------------------------------
-        --------------------------------------------
-        Stripe Response Handler
-        --------------------------------------------
-        --------------------------------------------*/
-        function stripeResponseHandler(status, response) {
-            if (response.error) {
-                $('.error')
-                    .removeClass('hide')
-                    .find('.alert')
-                    .text(response.error.message);
-            } else {
-                /* token contains id, last4, and card type */
-                var token = response['id'];
+                            $form.find('input[type=text]').empty();
+                            $form.append("<input type='hidden' name='stripeToken' value='" + token + "'/>");
+                            $form.get(0).submit();
+                        }
+                    }
 
-                $form.find('input[type=text]').empty();
-                $form.append("<input type='hidden' name='stripeToken' value='" + token + "'/>");
-                $form.get(0).submit();
-            }
-        }
-
-    });
-</script>
-
-</html>
+                });
+            </script> --}}
+        @endpush
+    </section>
+@endsection

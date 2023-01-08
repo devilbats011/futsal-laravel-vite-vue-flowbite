@@ -62,7 +62,7 @@ export default {
         if (!this.secretAdminCode)
             this.books = await fetch(`${origin}/api/books`).then(res => res.json());
         else {
-            this.books = await fetch(`${origin}/api/books/admin`, {
+           let books = await fetch(`${origin}/api/books/admin`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -70,6 +70,8 @@ export default {
                 },
                 body: JSON.stringify({ secret: this.secretAdminCode })
             }).then(res => res.json());
+            // console.log(books);
+            this.books = books.data;
         }
 
         // console.log(this.secretAdminCode,document.location);

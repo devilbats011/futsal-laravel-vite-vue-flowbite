@@ -6,52 +6,80 @@ use Stripe;
 use App\Models\Book;
 use App\Models\User;
 use App\Models\Court;
+use App\Models\Payment;
 use App\Models\Anonymous;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\BookCollection;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Redirect;
 
 class BookController extends Controller
 {
+
+
+
     public function apiBooks()
     {
         $books = Book::with(['court' => function ($query) {
-            $query->select('id','number');
+            $query->select('id', 'number');
         }])
-        ->paginate(5);
+            ->paginate(5);
         $books = new BookCollection($books);
-        return response()->json($books,200);
+        return response()->json($books, 200);
     }
 
     public function apiAdminBooks(Request $r)
     {
-        //*can use either ->input('') or ->get('')
-        if($r->input('secret'))
-        {
-            // $books =  Book::query()->getBooksAdmin($r->input('secret'));
+        //? $r->input and $r->get from fecth/axios params javascript
+        //* can use either $r->input('') or $r->get('') ..
+        if ($r->input('secret')) {
+            if (!User::Where('secret', $r->input('secret'))->first()) {
+                return response()->json(['error' => 'denied', 'data' => []], 403);
+            }
+
             $books = Book::with(['court' => function ($query) {
-                $query->select('id','number');
+                $query->select('id', 'number');
             }])->paginate(5);
-            return response()->json($books,200);
+            return response()->json(['error' => '', 'data' => $books], 200);
         }
     }
 
-    # Get
-    public function book(Court $court,Request $r)
+
+    # Get route('book.home');
+    public function book(Court $court, Request $r)
     {
-        // dd($r->all());
-        $books = Book::Where('book_date',Carbon::now()->format('Y-m-d'))
-        ->where('court_id',$court->id)
-        ->with(['court' => function ($query) {
-            $query->select('id','number');
-        }])
-        ->get()->makeHidden(['book_number']);
+
+        $book_date = validateDate($r->book_date) ? $r->book_date  : Carbon::now()->format('Y-m-d');
+        $books = Book::Where('book_date', $book_date)
+            ->where('court_id', $court->id)
+            ->with(['court' => function ($query) {
+                $query->select('id', 'number');
+            }])
+            ->get()->makeHidden(['book_number']);
+
+        $tableBook = collect([]);
+        for ($i = 9; $i < 24; $i++) {
+            $book = $books->where('time_book_start', $i)->first();
+            if ($book) {
+                $tableBook->push($book);
+                $i = $book->time_book_end - 1; //? tolak satu sbb next loop akan i++
+            } else {
+                $book = new Book;
+                $book->court = new Court;
+                $book->state = 'empty';
+                $book->time_book_start = $i;
+                $book->time_book_end = $i + 1;
+                $book->book_date = '';
+                $tableBook->push($book);
+            }
+        }
 
         return view('book')
-            ->with('court',$court)
-            ->with('books',$books);
+            ->with('court', $court)
+            ->with('books', $tableBook)
+            ->with('book_date', $book_date);
     }
 
     # Post
@@ -60,6 +88,7 @@ class BookController extends Controller
         $book = Book::where('book_number', $r->book_number)->first();
         return view('showbook', compact('book'));
     }
+
 
     public function bookValidation(Request $request)
     {
@@ -120,101 +149,154 @@ class BookController extends Controller
             //device|not required
             // !name and phone_no cannot be change for user that have acc,they need to edit/update official first, user cant simply change...
             'name' => ['required'],
-            'phone_no' => 'required'
+            'phone_no' => 'required',
+            'email' => 'required',
         ]);
     }
 
-    # Post
+    # Post route('book.add);
     public function bookCourt(Request $request)
     {
         $this->bookValidation($request);
         $isSave = false;
-        $message = '';
-        $error = '';
+        // $message = '';
+        // $error = '';
         $book = new Book;
         try {
-            if (!Auth::check()) {
-                $anonymous = Anonymous::create([
-                    'name' => $request->name,
-                    'phone_no' => $request->phone_no,
-                    'device' => $request->device,
-                ]);
-
-                $book->anonymous_id = $anonymous->id;
-            } else {
+            $anonymous = Anonymous::create([
+                'name' => $request->name,
+                'phone_no' => $request->phone_no,
+                'device' => $request->device,
+                'email' => $request->email,
+            ]);
+            $book->anonymous_id = $anonymous->id;
+            if (Auth::check()) {
                 $book->user_id = Auth()->id();
+                /** @var \App\Models\User $user */
+                $user = Auth()->user();
+                $user->anonymous()->save($anonymous);
             }
+
             $book->court_id = $request->court_id;
-            // $book->court_id = $request->number;
             $book->state = 'pending';
             $book->book_date = $request->book_date;
             $book->time_book_start = $request->time_book_start;
             $book->time_book_end = $request->time_book_end;
+            // $book->court_id = $request->number;
             $isSave = $book->save();
-            $message = 'Booking Pending..';
+            // $message = 'Booking Pending..';
         } catch (\Throwable $e) {
             $error = $e->getMessage();
         }
+        if (!$isSave) {
+            // todo: redirect or back to somewhere more suitable later on..
+            dd('something went wrong book not save');
+        }
 
-        return view('sandbox', [
-            // 'book' => $book,
-            'is_save' => $isSave,
-            'book_id' => $book->id,
-            'message' => $message,
-            'error' => $error,
-        ]);
-
-        // ----------------
-        # code...
-        // $anonymous = new Anonymous;
-        // $anonymous->name = $request->name;
-        // $anonymous->phone_no = $request->phone_no;
-        // $anonymous->device = $request->device;
-        // $anonymous->save();
-        // $book = Book::create([
-        //     'court_id' => $request->number,
-        //     'state' => 'booked',
-        //     'time_book_start' => $request->time_book,
-        // ]);
-        // $isSave = $book->exists();
-        // $book = new Book;
-        // $book->court_id = $request->number;
-        // $book->state = 'booked';
-        // $book->time_book = $request->time_book;
-        // dd("all",$request->all(),$request->number);
-        //add policy to add booking date
-        // 'user_id' => 1,
-        // 'anonymous_id' => 1,
-
-        // return response()->json([
+        Session::flash("message", "Book Created");
+        return redirect()->route('book.payment', [$book]);
+        //! bad practice to use view for route post !
+        // return view('sandbox', [
         //     'is_save' => $isSave,
         //     'book_id' => $book->id,
         //     'message' => $message,
         //     'error' => $error,
-        // ], 200);
+        // ]);
     }
 
-    # Put
+    # get route('book.payment', [$book]); / route('book.payment');
+    public function paymentBookOption(Book $book)
+    {
+        if ($book->state != 'pending') {
+            return redirect()->route('courts.home');
+        }
+        return view('payment', [
+            'book' => $book
+        ]);
+    }
+
+    /**
+     * # GET route('payment.success');
+     * vim {block visual = ctrl + v}
+     * ? https://laravel.com/docs/9.x/routing#parameters-regular-expression-constraints
+     * ? https://5balloons.info/how-to-get-url-parameters-into-controller-laravel/
+     * ? https://stripe.com/docs/payments/accept-a-payment?platform=web&ui=checkout
+     * ? https://stripe.com/docs/payments/checkout/custom-success-page
+     **/
+    public function paymentSuccess($data = null, Request $r)
+    {
+        try {
+            $stripe = new Stripe\StripeClient('sk_test_wVr5bhfz0lPTQb6uG2RxsojZ');
+            $session = $stripe->checkout->sessions->retrieve($r->session_id);
+            $customer = $stripe->customers->retrieve($session->customer);
+            dd($session, $customer);
+            // echo "<h1>Thanks for your order, $customer->name!</h1>";
+            // http_response_code(200);
+
+            //todo: $data book_number and also need to it email to the user
+            return view('success', ['data' => $data]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+
+    # POST route('payment.decision');
+    public function paymentDecision(Request $request, Book $book)
+    {
+        $validate_data = $request->validate(['payment_method' => 'required']);
+
+        if ($book->payment) {
+            if (in_array($book->payment->payment_status, ['pending', 'fail'])) {
+                return redirect()->route('payment.stripe');
+            }
+
+            $payment_status = $book->payment->payment_status;
+            if (in_array($payment_status, ['counter', 'success'])) {
+                Session::flash('message', "payment status : Already Flash {$payment_status}");
+                return redirect()->route('payment.success', $book->book_number);
+            }
+        }
+
+        $payment = new Payment;
+        $payment_method = strtolower($validate_data['payment_method']);
+        if ($payment_method == 'counter') {
+            $payment->payment_method = 'counter';
+            $payment->payment_status = 'counter';
+            //todo: maybe put book->status at observer or model event iself(updating/updated mybe...)
+            // $book->update(['state'=>'booked']);
+            $book->payment()->save($payment);
+            Session::flash('message', "payment status : Success flash {$payment_method}");
+            return redirect()->route('payment.success', $book->book_number);
+        } else if ($payment_method == 'online') {
+            $payment->payment_method = 'online';
+            $payment->online_gateway_name = 'stripe';
+            $payment->payment_status = 'pending';
+            $book->payment()->save($payment);
+            return redirect()->route('payment.stripe');
+        }
+        Session::flash('message', 'Whoops Something Went Wrong..');
+        return back();
+    }
+
+    # Put route('book.edit);
     public function updateBook(Book $book, Request $request)
     {
-        // dd($book,$request->all());
+        // todo: validation lassttt - will check sekali create book.
+
         $v = $request->validate([
             'court_number' => ['required'],
             'time_book_start' => ['required'],
             'time_book_end' => ['required'],
             'book_date' => ['required'],
         ]);
-        $c = Court::where('number',$v['court_number'])->first();
+        $c = Court::where('number', $v['court_number'])->first();
         $o = collect($v)->except(['court_number']);
         $o->put('court_id', $c->id);
         $isUpdate = $book->update($o->toArray());
         // $this->bookValidation($request);
         Session::flash('message', $isUpdate ? 'Your book has been updated.' : 'Something Went Wrong..');
         return view('showbook', compact('book'));
-
-        // *KIV...when update the validation will be inconsistent because does not exclude itself
-        // todo: need to structure the frontend and integrate with backend first to continue this..
-
     }
 
     # Delete
@@ -272,5 +354,44 @@ class BookController extends Controller
         ]);
         Session::flash('delete', 'Payment successful!');
         return back();
+    }
+
+
+    # Post route('payment.stripe.v3');
+    //? https://stripe.com/docs/checkout/quickstart
+    //? https://stripe.com/docs/api/checkout/sessions
+    //? https://stripe.com/docs/payments/accept-a-payment?platform=web&ui=checkout
+    //? https://stripe.com/docs/payments/checkout/custom-success-page
+    public function stripe_v3(Request $r)
+    {
+        // = Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+        $stripe = new Stripe\StripeClient('sk_test_wVr5bhfz0lPTQb6uG2RxsojZ');
+
+        $checkout_session = $stripe->checkout->sessions->create([
+            'customer_email' => 'wan@example.com',
+            'submit_type' => 'book', //? https://stripe.com/docs/api/checkout/sessions/create#create_checkout_session-submit_type
+            // 'billing_address_collection' => 'required',
+            // 'shipping_address_collection' => [
+            //     'allowed_countries' => ['MY'], //,'US', 'CA'
+            // ],
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => 'myr', //'usd',
+                    'product_data' => [
+                        'name' => 'Book Court X',
+                    ],
+                    'unit_amount' => 2000,
+                ],
+                'quantity' => 1,
+            ]],
+            'mode' => 'payment',
+            // 'success_url' => 'http://localhost:8000/payment-success?session_id={CHECKOUT_SESSION_ID}"',
+            'success_url' => route("payment.success", [GenerateSomeSaltyRandomCode()]).'?session_id={CHECKOUT_SESSION_ID}', // "http://localhost:8000/payment/success?session_id={CHECKOUT_SESSION_ID}"
+            // 'cancel_url' => 'http://localhost:8000/payment-cancel',
+            'cancel_url' => route("payment.cancel"),
+        ]);
+
+        //? https://laravel.com/docs/9.x/responses#redirecting-external-domains
+        return redirect()->away($checkout_session->url);
     }
 }

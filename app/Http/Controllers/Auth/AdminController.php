@@ -9,22 +9,32 @@ use App\Http\Controllers\Controller;
 
 class AdminController extends Controller
 {
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('auth');
         $this->middleware('admin');
     }
 
-    private function secretAdminCode() {
-        return mt_rand(1000, 9999)."-".strtoupper(Str::random(4));
+    private function secretAdminCode()
+    {
+        return mt_rand(1000, 9999) . "-" . strtoupper(Str::random(4));
     }
 
-    public function index() {
+    public function index()
+    {
         return view('admin');
     }
 
     public function sandbox()
     {
-        // dd($this->secretAdminCode());
-        return view('admin.admin-sandbox',['secretAdminCode'=>$this->secretAdminCode()]);
+        $secret = '';
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if ($user->role == 'admin') {
+            $secret = GenerateSomeSaltyRandomCode();
+            $user->secret =  $secret;
+            $user->save();
+        }
+        return view('admin.admin-sandbox', [ 'secretAdminCode' => $secret ]);
     }
 }

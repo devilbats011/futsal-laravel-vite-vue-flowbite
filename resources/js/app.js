@@ -12,8 +12,16 @@ import loginComponent from "./components/Login.vue";
 import courtComp from "./components/Courts.vue";
 import bookListComp from "./components/BookList.vue";
 import bookComp from "./components/Book.vue";
+import { HtoUpperCaseFirstLetter,HconvertTo12hoursFormat } from "./helpers";
 
 const app = createApp({});
+
+const addGlobalHelperToVueApp = () => {
+    //? https://stackoverflow.com/questions/63100658/add-global-variable-in-vue-js-3
+    app.config.globalProperties.$toUpperCaseFirstLetter = HtoUpperCaseFirstLetter;
+    app.config.globalProperties.$convertTo12hoursFormat = HconvertTo12hoursFormat;
+}
+
 const route = () => {
     let url = window.location.pathname;
     // console.log(url); //temporary..
@@ -39,9 +47,12 @@ const route = () => {
     app.component('courts',courtComp);
     app.component('book-list',bookListComp);
     app.component('book',bookComp);
+
 };
 
+addGlobalHelperToVueApp();
 route();
+
 
 /**
  * The following block of code may be used to automatically register your
@@ -62,3 +73,7 @@ route();
  */
 
 app.mount("#app");
+
+
+
+

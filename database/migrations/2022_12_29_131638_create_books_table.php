@@ -13,18 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        //booking -- refer to schema laravel docs
+        // https://laravel.com/docs/9.x/migrations#foreign-key-constraints
         Schema::create('books', function (Blueprint $table) {
             $table->id();
             $table->foreignId('court_id')->nullable()->constrained('courts');
             $table->foreignId('user_id')->nullable()->constrained('users');
             $table->foreignId('anonymous_id')->nullable()->constrained('anonymous');
+            // $table->foreignId('payment_id')->nullable()->constrained('payments')->onDelete('cascade');
             $table->enum('state',['empty','pending','booked'])->default('empty')->comment('booked|pending|empty');
             $table->string('book_number')->nullable();
             $table->string('book_date')->nullable();
-            $table->string('time_book_start')->nullable(); //start eg: 9am
-            $table->string('time_book_end')->nullable(); //end eg :11am
-            //start 9am - end 11 am
+            $table->string('time_book_start')->nullable();
+            $table->string('time_book_end')->nullable();
             $table->timestamps();
         });
     }

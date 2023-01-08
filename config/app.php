@@ -14,7 +14,7 @@ return [
     | any other location as required by the application or its packages.
     |
     */
-    'tag' => 'p.v.5', //? p = patch | v = version
+    'tag' => 'p.v.6', //? p = patch | v = version
 
     'name' => env('APP_NAME', 'Laravel'),
 

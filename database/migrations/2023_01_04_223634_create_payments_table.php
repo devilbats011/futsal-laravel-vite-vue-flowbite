@@ -13,14 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('anonymous', function (Blueprint $table) {
+        Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
-            $table->string('email')->nullable();
-            $table->string('phone_no')->nullable();
-            $table->string('device')->nullable();
+            $table->string('payment_method')->nullable();
+            $table->string('online_gateway_name')->nullable();
+            $table->enum('payment_status', ['counter', 'pending', 'fail', 'success'])->default('pending')->comment('pending|counter|fail|success');
             //? https://laravel.com/docs/9.x/migrations#foreign-key-constraints
-            $table->foreignId('user_id')->nullable()->constrained('users')->onUpdate('cascade');
+            $table->foreignId('book_id')->nullable()->constrained('books')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('anonymous');
+        Schema::dropIfExists('payments');
     }
 };
