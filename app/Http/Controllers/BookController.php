@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\BookCollection;
+use App\Jobs\SendEmail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Redirect;
 
@@ -147,16 +148,17 @@ class BookController extends Controller
                 // },
             ],
             //device|not required
-            // !name and phone_no cannot be change for user that have acc,they need to edit/update official first, user cant simply change...
             'name' => ['required'],
             'phone_no' => 'required',
-            'email' => 'required',
+            'email' => ['required','email'],
         ]);
     }
 
     # Post route('book.add);
     public function bookCourt(Request $request)
     {
+        // dd($request->all()); // test
+
         $this->bookValidation($request);
         $isSave = false;
         // $message = '';
@@ -223,18 +225,24 @@ class BookController extends Controller
      * ? https://stripe.com/docs/payments/accept-a-payment?platform=web&ui=checkout
      * ? https://stripe.com/docs/payments/checkout/custom-success-page
      **/
-    public function paymentSuccess($data = null, Request $r)
+    public function paymentSuccess(Book $book,$data = null, Request $r)
     {
+        // dd($book,$data); //test
         try {
+            $emailJob = (new SendEmail($book))->delay(Carbon::now()->addSeconds(10));
+            dispatch($emailJob);
+            $payload = ['book'=> $book,'data' => $data];
+
+            if(!$r->session) {
+                return view('success', $payload);
+            }
+
             $stripe = new Stripe\StripeClient('sk_test_wVr5bhfz0lPTQb6uG2RxsojZ');
             $session = $stripe->checkout->sessions->retrieve($r->session_id);
             $customer = $stripe->customers->retrieve($session->customer);
-            dd($session, $customer);
-            // echo "<h1>Thanks for your order, $customer->name!</h1>";
-            // http_response_code(200);
+            // dd($session, $customer);
 
-            //todo: $data book_number and also need to it email to the user
-            return view('success', ['data' => $data]);
+            return view('success', $payload);
         } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
@@ -254,7 +262,7 @@ class BookController extends Controller
             $payment_status = $book->payment->payment_status;
             if (in_array($payment_status, ['counter', 'success'])) {
                 Session::flash('message', "payment status : Already Flash {$payment_status}");
-                return redirect()->route('payment.success', $book->book_number);
+                return redirect()->route('payment.success', [$book,$book->book_number]);
             }
         }
 
@@ -267,7 +275,7 @@ class BookController extends Controller
             // $book->update(['state'=>'booked']);
             $book->payment()->save($payment);
             Session::flash('message', "payment status : Success flash {$payment_method}");
-            return redirect()->route('payment.success', $book->book_number);
+            return redirect()->route('payment.success',[$book ,$book->book_number]);
         } else if ($payment_method == 'online') {
             $payment->payment_method = 'online';
             $payment->online_gateway_name = 'stripe';

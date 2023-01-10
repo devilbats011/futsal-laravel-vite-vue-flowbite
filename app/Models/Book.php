@@ -19,6 +19,10 @@ class Book extends Model
         // return $this->belongsTo(Court::class,'court_id','id');
     }
 
+    public function anonymous() {
+        return $this->belongsTo(Anonymous::class);
+    }
+
     //? lowercase noun not plural
     //? https://www.itsolutionstuff.com/post/laravel-one-to-one-eloquent-relationship-tutorialexample.html
     public function payment() {

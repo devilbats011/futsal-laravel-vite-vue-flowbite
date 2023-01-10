@@ -1,6 +1,11 @@
 <?php
 
+use Carbon\Carbon;
+use App\Models\Book;
+use App\Jobs\SendEmail;
+use App\Mail\BookNumber;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CourtController;
 
@@ -17,7 +22,7 @@ use App\Http\Controllers\CourtController;
 Route::prefix('test')->group(function (){
     Route::get('/a', function ()
     {
-        dump(auth()->check());
+        dump(route('real.home'),URL('futsal-logo.jpg'),auth()->check());
         // dump(mt_rand(1000, 9999)."-".strtoupper(Str::random(4)));
 
     })->name('test.a');
@@ -29,12 +34,26 @@ Route::prefix('test')->group(function (){
         dump(route("payment.success",[generateSomeSaltyRandomCode(),'id'=> 1]));
         dd(route("payment.success",['id'=> 1,GenerateSomeSaltyRandomCode()]));
     });
+    Route::get('/c',function () {
+        $book = Book::find(1);
+        return redirect()->route('payment.success', [$book,$book->book_number]);
+        // echo route('payment.success', [$book,$book->book_number]);
+    });
+    Route::get('/d',function () {
+        $book = Book::find(1);
+        $sec = 10;
+        $emailJob = (new SendEmail($book))->delay(Carbon::now()->addSeconds($sec));
+        dispatch($emailJob);
+        // return new BookNumber($book);
+        return "sending...in {$sec} sec..1";
+    });
+
 });
 
 Route::get('/', function () {
     // return view('welcome', ['name' => 'Ali']);
     return view('welcome');
-});
+})->name('real.home');
 
 Auth::routes();
 
@@ -67,7 +86,7 @@ Route::controller(App\Http\Controllers\BookController::class)->group(function ()
 });
 
 Route::prefix('payment')->group(function() {
-    Route::get('/success/{data?}',[App\Http\Controllers\BookController::class, 'paymentSuccess'])->name('payment.success');
+    Route::get('/success/{book}/{data?}',[App\Http\Controllers\BookController::class, 'paymentSuccess'])->name('payment.success');
     Route::get('/cancel/{data?}',[App\Http\Controllers\BookController::class, 'paymentSuccess'])->name('payment.cancel');
     Route::get('/stripe',[App\Http\Controllers\BookController::class, 'stripe'])->name('payment.stripe');
 });
