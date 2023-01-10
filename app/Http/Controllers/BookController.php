@@ -149,9 +149,12 @@ class BookController extends Controller
             ],
             //device|not required
             'name' => ['required'],
-            'phone_no' => 'required',
+            //? https://ihateregex.io/expr/phone/
+            'phone_no' => 'required|regex:/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/',
             'email' => ['required','email'],
         ]);
+
+        dd($request->all());
     }
 
     # Post route('book.add);
