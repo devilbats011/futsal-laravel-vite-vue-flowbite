@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CourtController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +23,7 @@ use App\Http\Controllers\CourtController;
 Route::prefix('test')->group(function (){
     Route::get('/a', function ()
     {
+        dd(Auth::user());
         dump(route('real.home'),URL('futsal-logo.jpg'),auth()->check());
         // dump(mt_rand(1000, 9999)."-".strtoupper(Str::random(4)));
 
@@ -35,6 +37,7 @@ Route::prefix('test')->group(function (){
         dd(route("payment.success",['id'=> 1,GenerateSomeSaltyRandomCode()]));
     });
     Route::get('/c',function () {
+
         $book = Book::find(1);
         return redirect()->route('payment.success', [$book,$book->book_number]);
         // echo route('payment.success', [$book,$book->book_number]);
@@ -51,8 +54,7 @@ Route::prefix('test')->group(function (){
 });
 
 Route::get('/', function () {
-    // return view('welcome', ['name' => 'Ali']);
-    return view('welcome');
+    return view('welcome', ['bgUrl' => URL('bg-futsal-1.jpeg'),'bgGridUrl' => URL('bg-grid.svg')]);
 })->name('real.home');
 
 Auth::routes();
@@ -62,11 +64,16 @@ Route::controller(App\Http\Controllers\AdminController::class)->group(function (
         Route::name('admin.')->group(function () {
             Route::get('/', [App\Http\Controllers\Auth\AdminController::class, 'index'])->name('home');
             Route::get('/sandbox', [App\Http\Controllers\Auth\AdminController::class, 'sandbox'])->name('sandbox');
+            Route::get('/log', [App\Http\Controllers\Auth\AdminController::class, 'log'])->name('log');
         });
     });
 });
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::controller(App\Http\Controllers\UserController::class)->group(function () {
+    Route::get('/home', 'index')->name('home');
+
+});
+// Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::get('courts',[CourtController::class,'courts'])->name('courts.home');
 

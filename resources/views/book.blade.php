@@ -23,7 +23,7 @@
             </h1>
             <section class="overflow-x-auto relative shadow-md sm:rounded-lg">
                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-blue-300 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
                             <th scope="col" class="py-3 px-6">
                                 Court Number
@@ -57,6 +57,8 @@
                 </table>
             </section>
             <section class="pt-6">
+
+
                 {{-- ? https://laravel.com/docs/9.x/requests#retrieving-old-input --}}
                 {{-- todo : Put old input name|email|number..etc if there are more.. --}}
                 <book
@@ -69,6 +71,7 @@
                     route-action="{{ route('book.add') }}"
                     court="{{ $court }}"
                     csrf="{{ csrf_token() }}"
+                    user="{{auth()->user()}}"
                 ></book>
             </section>
             {{-- <section class="mt-5 p-5 text-red-400">
@@ -145,7 +148,6 @@
                 <button type="submit"
                     class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
             </form> --}}
-            {{-- pattern="[0-9]{3}[0-9]{3}[0-9]{4}" --}}
 
         </div>
 

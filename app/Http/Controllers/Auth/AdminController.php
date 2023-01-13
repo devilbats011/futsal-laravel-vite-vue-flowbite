@@ -6,6 +6,7 @@ use App\Models\Book;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Log;
 
 class AdminController extends Controller
 {
@@ -35,6 +36,15 @@ class AdminController extends Controller
             $user->secret =  $secret;
             $user->save();
         }
-        return view('admin.admin-sandbox', [ 'secretAdminCode' => $secret ]);
+
+        $books = Book::With('anonymous')->with('court')->paginate(5);
+        // dd($books);
+
+        return view('admin.admin-list-book', [ 'secretAdminCode' => $secret,'books'=> $books ]);
+    }
+
+    public function log() {
+        $logs = Log::query()->paginate(10);
+        return view('admin.admin-log',compact('logs'));
     }
 }

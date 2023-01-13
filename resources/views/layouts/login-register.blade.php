@@ -20,12 +20,13 @@
 <body>
     @include('components.nav-toast')
 
-    <div id="app">
+    <div id="app" class="">
         @include('components.nav')
-    <hr>
-
-        <main>
-            @yield('content-play')
+        <hr>
+        <main class="relative flex min-h-screen flex-col justify-center overflow-hiddenn bg-[url('http://localhost:8000/bg-grid.svg')]" >
+            {{-- ? bg-[url('https://play.tailwindcss.com/img/grid.svg')] bg-[url('{{URL("bg-grid.svg")}}')]  --}}
+            {{-- <div class="w-72 h-72 bg-white bg-opacity-20 backdrop-blur-lg rounded drop-shadow-lg"></div> --}}
+            @yield('content')
 
         </main>
     </div>

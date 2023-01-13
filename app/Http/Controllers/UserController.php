@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class HomeController extends Controller
+class UserController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -24,8 +25,12 @@ class HomeController extends Controller
      */
     public function index()
     {
-        //IF admin access , add one extra button call "Admin Portal" in Navbar
-        return view('home');
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $books = Book::Where('user_id',$user->id)->with('anonymous')->with('court')->paginate(5);
+        // dd($books);
+        return view('home',compact('books'));
+
 
     }
 }

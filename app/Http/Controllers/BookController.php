@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\BookCollection;
 use App\Jobs\SendEmail;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Redirect;
 
 class BookController extends Controller
 {
@@ -42,7 +41,7 @@ class BookController extends Controller
 
             $books = Book::with(['court' => function ($query) {
                 $query->select('id', 'number');
-            }])->paginate(5);
+            }])->with('anonymous')->paginate(10);
             return response()->json(['error' => '', 'data' => $books], 200);
         }
     }
@@ -100,61 +99,91 @@ class BookController extends Controller
             'book_date' => 'required|date',
             'time_book_start' => [
                 'required',
-                // function ($attribute, $value, $fail) use ($request) {
-                //     $time_book_start = Carbon::parse($value);
-                //     $time_book_end = Carbon::parse($request->time_book_end);
-                //     if ($time_book_start->gte($time_book_end)) {
-                //         return $fail('time book start cannot be greater than time book end');
-                //     }
+                function ($attribute, $value, $fail) use ($request) {
+                    //     $time_book_start = Carbon::parse($value);
+                    //     $time_book_end = Carbon::parse($request->time_book_end);
+                    $time_book_start = $value;
+                    $time_book_end = $request->time_book_end;
 
-                //     //creating unique logic at booking time
-                //     //when thing get large -> be optimize with created date/updated date
-                //     $booksCollection = Book::Where('court_id', $request->number)->get();
-                //     // check start and end should be at least one hour apart..cannot the same
-                //     // check if time_book change to CARBON then compare with b_end (time_book_carbon_end >= b_start && time_book_carbon_end <= b_end)
-                //     $booksCollection->each(function ($item, $key) use ($value, $fail) {
-                //         $time_book_start = Carbon::parse($value);
-                //         $item_time_book_start = Carbon::parse($item->time_book_start);
-                //         $item_time_book_end = Carbon::parse($item->time_book_end);
-                //         if ($time_book_start->eq($item_time_book_start)) {
-                //             return $fail('The time book has already been taken.');
-                //         }
-                //         if ($time_book_start->gt($item_time_book_start) && $time_book_start->lt($item_time_book_end)) {
-                //             return $fail('The time book has already been taken.');
-                //         }
-                //     });
-                // }
+                    if ($time_book_start == $time_book_end) {
+                        return $fail('start time and end time booking cannot be the same.');
+                    }
+
+                    if ($time_book_start > $time_book_end) {
+                        return $fail('time book start cannot be greater than time book end');
+                    }
+                    //? https://stackoverflow.com/questions/19325312/how-to-create-multiple-where-clause-query-using-laravel-eloquent
+                    $bookFirst = Book::Where([
+                        ['court_id', '=', $request->court_id],
+                        ['book_date', '=', $request->book_date],
+                        ['time_book_start', '=', $time_book_start],
+                    ])->first();
+                    // ? https://laravel.com/docs/9.x/collections#method-first
+                    if ($bookFirst) {
+                        return $fail('The time book has already been taken.1');
+                    }
+
+                    //     //creating unique logic at booking time
+                    //     //when thing get large -> be optimize with created date/updated date
+                    //     // check start and end should be at least one hour apart..cannot the same
+                    //     // check if time_book change to CARBON then compare with b_end (time_book_carbon_end >= b_start && time_book_carbon_end <= b_end)
+                    $booksCollection = Book::Where('court_id', $request->court_id)
+                    ->where('book_date', $request->book_date)
+                    ->get();
+                    $booksCollection->each(function ($item, $key) use ($time_book_start, $time_book_end, $fail) {
+                        // $time_book_start = $value;
+                        $item_time_book_start = $item->time_book_start;
+                        $item_time_book_end = $item->time_book_end;
+
+                        if ($time_book_start > $item_time_book_start && $time_book_start < $item_time_book_end) {
+                            return $fail('The time book has already been taken.01');
+                        }
+                        else if ($time_book_start < $item_time_book_start && $time_book_end > $item_time_book_end) {
+                            return $fail('The time book has already been taken.011');
+                        }
+                        else if($time_book_end > $item_time_book_start && $time_book_end < $item_time_book_end) {
+                            return $fail('The time book has already been taken.02');
+                        }
+                    });
+                }
             ],
             'time_book_end' => [
                 'required',
-                // function ($attribute, $value, $fail) use ($request) {
+                function ($attribute, $value, $fail) use ($request) {
 
-                //     if ($request->time_book_start == $value) {
-                //         $fail('start time and end time booking cannot be the same.');
-                //     }
-                //     $booksCollection = Book::Where('court_id', $request->number)->get();
-                //     $booksCollection->each(function ($item, $key) use ($value, $fail) {
+                    $time_book_start = $request->time_book_start;
+                    $time_book_end = $value;
 
-                //         $time_book_end = Carbon::parse($value);
-                //         $item_time_book_start = Carbon::parse($item->time_book_start);
-                //         $item_time_book_end = Carbon::parse($item->time_book_end);
-                //         if ($time_book_end->eq($item_time_book_end)) {
-                //             return $fail('The time book has already been taken.');
-                //         }
-                //         if ($time_book_end->gt($item_time_book_start) && $time_book_end->lt($item_time_book_end)) {
-                //             return $fail('The time book has already been taken.');
-                //         }
-                //     });
-                // },
+                    //? https://stackoverflow.com/questions/19325312/how-to-create-multiple-where-clause-query-using-laravel-eloquent
+                    $bookFirst = Book::Where([
+                        ['court_id', '=', $request->court_id],
+                        ['book_date', '=', $request->book_date],
+                        ['time_book_end', '=', $time_book_end],
+                    ])->first();
+
+                    // ? https://laravel.com/docs/9.x/collections#method-first
+                    if ($bookFirst) {
+                        return $fail('The time book has already been taken.2');
+                    }
+
+                    //     $booksCollection = Book::Where('court_id', $request->number)->get();
+                    //     $booksCollection->each(function ($item, $key) use ($value, $fail) {
+                    //         $time_book_end = Carbon::parse($value);
+                    //         $item_time_book_start = Carbon::parse($item->time_book_start);
+                    //         $item_time_book_end = Carbon::parse($item->time_book_end);
+                    //         if ($time_book_end->eq($item_time_book_end)) {
+                    //             return $fail('The time book has already been taken.');
+                    //         }
+                    //     });
+                },
             ],
-            //device|not required
             'name' => ['required'],
             //? https://ihateregex.io/expr/phone/
             'phone_no' => 'required|regex:/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/',
-            'email' => ['required','email'],
+            'email' => ['required', 'email'],
         ]);
 
-        dd($request->all());
+        // dd($request->all());
     }
 
     # Post route('book.add);
@@ -228,15 +257,15 @@ class BookController extends Controller
      * ? https://stripe.com/docs/payments/accept-a-payment?platform=web&ui=checkout
      * ? https://stripe.com/docs/payments/checkout/custom-success-page
      **/
-    public function paymentSuccess(Book $book,$data = null, Request $r)
+    public function paymentSuccess(Book $book, $data = null, Request $r)
     {
         // dd($book,$data); //test
         try {
             $emailJob = (new SendEmail($book))->delay(Carbon::now()->addSeconds(10));
             dispatch($emailJob);
-            $payload = ['book'=> $book,'data' => $data];
+            $payload = ['book' => $book, 'data' => $data];
 
-            if(!$r->session) {
+            if (!$r->session) {
                 return view('success', $payload);
             }
 
@@ -265,7 +294,7 @@ class BookController extends Controller
             $payment_status = $book->payment->payment_status;
             if (in_array($payment_status, ['counter', 'success'])) {
                 Session::flash('message', "payment status : Already Flash {$payment_status}");
-                return redirect()->route('payment.success', [$book,$book->book_number]);
+                return redirect()->route('payment.success', [$book, $book->book_number]);
             }
         }
 
@@ -278,7 +307,7 @@ class BookController extends Controller
             // $book->update(['state'=>'booked']);
             $book->payment()->save($payment);
             Session::flash('message', "payment status : Success flash {$payment_method}");
-            return redirect()->route('payment.success',[$book ,$book->book_number]);
+            return redirect()->route('payment.success', [$book, $book->book_number]);
         } else if ($payment_method == 'online') {
             $payment->payment_method = 'online';
             $payment->online_gateway_name = 'stripe';
@@ -295,12 +324,13 @@ class BookController extends Controller
     {
         // todo: validation lassttt - will check sekali create book.
 
-        $v = $request->validate([
-            'court_number' => ['required'],
-            'time_book_start' => ['required'],
-            'time_book_end' => ['required'],
-            'book_date' => ['required'],
-        ]);
+        // $v = $request->validate([
+        //     'court_number' => ['required'],
+        //     'time_book_start' => ['required'],
+        //     'time_book_end' => ['required'],
+        //     'book_date' => ['required'],
+        // ]);
+        $v = $this->bookValidation($request);
         $c = Court::where('number', $v['court_number'])->first();
         $o = collect($v)->except(['court_number']);
         $o->put('court_id', $c->id);
@@ -397,7 +427,7 @@ class BookController extends Controller
             ]],
             'mode' => 'payment',
             // 'success_url' => 'http://localhost:8000/payment-success?session_id={CHECKOUT_SESSION_ID}"',
-            'success_url' => route("payment.success", [GenerateSomeSaltyRandomCode()]).'?session_id={CHECKOUT_SESSION_ID}', // "http://localhost:8000/payment/success?session_id={CHECKOUT_SESSION_ID}"
+            'success_url' => route("payment.success", [GenerateSomeSaltyRandomCode()]) . '?session_id={CHECKOUT_SESSION_ID}', // "http://localhost:8000/payment/success?session_id={CHECKOUT_SESSION_ID}"
             // 'cancel_url' => 'http://localhost:8000/payment-cancel',
             'cancel_url' => route("payment.cancel"),
         ]);

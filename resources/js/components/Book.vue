@@ -30,9 +30,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border"
-                        :class="trClassBehaviour(book)" v-for="book, no in booksData"
-                        @click="(event) => clickBook(book, event)" :id="'id-book-' + no">
+                    <tr class="dark:bg-gray-800 dark:border-gray-700 border" :class="trClassBehaviour(book)"
+                        v-for="book, no in booksData" @click="(event) => clickBook(book, event)" :id="'id-book-' + no">
                         <td class="py-4 px-6">
                             {{ no+ 1 }}
                         </td>
@@ -66,7 +65,7 @@
                 <input type="date" name="book_date" id="book_date"
                     class="select-none block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     required ref="refDate" v-model="date" readonly />
-                    <!-- disabled -->
+                <!-- disabled -->
                 <!-- ? https://stackoverflow.com/questions/1355728/values-of-disabled-inputs-will-not-be-submitted -->
                 <label for="book_date"
                     class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
@@ -122,23 +121,24 @@
             <div class="relative z-0 my-10 w-full group">
                 <input type="text" name="name" id="name"
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                    placeholder=" " required :value="oldName" />
-                <!--  -->
+                    placeholder=" " required v-model="name" />
+                <!-- :value="oldName" -->
                 <label for="name"
                     class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-[0.2px] -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Name</label>
             </div>
             <div class="relative z-0 my-10 w-full group">
                 <input type="email" name="email" id="email"
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                    placeholder=" " :value="oldEmail" />
-                <!-- type="email" required -->
+                    placeholder=" " v-model="email" />
+                <!-- type="email" required  :value="" -->
                 <label for="email"
                     class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-[0.2px] -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Email</label>
             </div>
             <div class="relative z-0 my-10 w-full group">
                 <input type="tel" name="phone_no" id="phone_no"
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                    placeholder=" " required :value="oldPhoneNo" />
+                    placeholder=" " required v-model="phoneNo" />
+                <!-- :value="oldPhoneNo" -->
                 <label for="phone_no"
                     class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-[0.2px] -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                     Phone number (1234567890)</label>
@@ -158,21 +158,33 @@ import moment from 'moment';
 export default {
     mounted() {
 
-        //* mount device
+ this.name = this.oldName ?? '?-?';
+console.log(typeof this.oldEmail,this.oldEmail == '');
+
+        //* Mount User, Name, Phone ,Email
+        if (this.user) {
+            this.dataUser = JSON.parse(this.user);
+            this.name = this.oldName ? this.oldName : this.dataUser.name;
+            this.phoneNo = this.oldPhoneNo ? this.oldPhoneNo : this.dataUser.phone_no;
+            this.email = this.oldEmail ? this.oldEmail : this.dataUser.email ;
+        }
+        else {
+            // console.log('%c this.user == ""','color: orange',this.user == "");
+            this.name = this.oldName;
+            this.email = this.oldEmail;
+            this.phoneNo = this.oldPhoneNo;
+        }
+
+        //* Mount device
         this.device = window.navigator.userAgent;
 
-        //* mount date
+        //* Mount date
         this.date = this.book_date ? this.book_date : moment(new Date()).format('yyyy-MM-D');
 
-        //* mount dataCourt
+        //* Mount dataCourt
         this.dataCourt = JSON.parse(this.court);
 
-        // console.log(moment().format('D-mm-yyyy'));
-        // this.$refs.refDate.valueAsDate = new Date();
-        // const date = this.$refs.ref_book_date;
-        // date.valueAsDate = this.book_date ? new Date(this.book_date) : new Date();
-
-        //* mount books
+        //* Mount books
         let books = JSON.parse(this.books);
         books.map((b) => {
             if (b.state.toLowerCase() != 'empty')
@@ -182,9 +194,17 @@ export default {
             return b;
         });
         this.booksData = books;
+
+        // console.log(moment().format('D-mm-yyyy'));
+        // this.$refs.refDate.valueAsDate = new Date();
+        // const date = this.$refs.ref_book_date;
+        // date.valueAsDate = this.book_date ? new Date(this.book_date) : new Date();
     },
     data() {
         return {
+            name: '',
+            phoneNo: '',
+            email: '',
             dataCourt: {},
             time_book_start: null,
             time_book_end: null,
@@ -195,6 +215,7 @@ export default {
             area: [],
             states: ['All', 'Pending', 'Booked', 'Empty'],
             state: 'All',
+            dataUser: null,
         }
     },
     props: {
@@ -231,6 +252,10 @@ export default {
             type: String,
             default: ''
         },
+        user: {
+            type: String,
+            default: ''
+        },
     },
     methods: {
         changeBookDate() {
@@ -238,7 +263,8 @@ export default {
             submit.click();
         },
         trClassBehaviour(book) {
-            let sumClass = book.state.toLowerCase() == 'empty' ? 'cursor-pointer hover:border-slate-500 hover:bg-slate-500 hover:text-slate-100 hover:text-base' : '';
+            // hover:bg-slate-700 hover:text-slate-100   border-t hover:border-slate-500
+            let sumClass = book.state.toLowerCase() == 'empty' ? 'cursor-pointer hover:text-base bg-white border border-b' : 'bg-slate-50';
             return sumClass;
         },
         clickBook(book, event) {
@@ -248,21 +274,54 @@ export default {
                 //* :class="trClassBehaviour(book)" v-for="book, no in booksData"
                 //* let sumClass = book.state.toLowerCase() == 'empty' ? 'cursor-pointer hover:border-slate-500 hover:bg-slate-500 hover:text-slate-100 hover:text-base' : '';
                 const el = event.target.parentNode;
+
                 const pickToTrueClass = (_book, _el) => {
                     _book.pick = true;
                     _el.classList.remove('bg-white',);
-                    _el.classList.add('bg-slate-500', 'text-slate-100');
-                }
-                const pickToFalseClass = (_book, _el) => {
-                    _book.pick = false;
-                    _el.classList.add('bg-white');
-                    _el.classList.remove('bg-slate-500', 'text-slate-100');
+                    _el.classList.add('bg-slate-700', 'text-slate-100');
                 }
 
-                const clearTime = () => {
+                const pickToFalseClass = (_book, _el, option = null) => {
+
+                    if (option) {
+                        if (option.hoverOff) {
+                            //'hover:bg-slate-700', 'hover:text-slate-100', 'hover:border-slate-500',
+                            _el.classList.remove( 'hover:text-base');
+                            setTimeout(() => {
+                                //'hover:bg-slate-700', 'hover:text-slate-100', 'hover:border-slate-500',
+                                _el.classList.add( 'hover:text-base');
+                            }, 1700);
+                        }
+
+                        // just incase...
+                        if (option.hoverOn) {
+                            //'hover:bg-slate-700', 'hover:text-slate-100', 'hover:border-slate-500',
+                            _el.classList.add( 'hover:text-base');
+                        }
+                    }
+
+                    _book.pick = false;
+                    _el.classList.add('bg-white');
+                    _el.classList.remove('bg-slate-700', 'text-slate-100');
+                }
+
+                const clearHoursAndTimeStartEnd = () => {
                     this.total_hour = 0;
                     this.time_book_start = null;
                     this.time_book_end = null;
+                }
+
+                const clearAllEmptyArea = () => {
+                    this.booksData.forEach((eachBook, no) => {
+                        if (eachBook.state.toLowerCase() == 'empty') {
+                            const eachId = document.getElementById('id-book-' + no);
+                            pickToFalseClass(eachBook, eachId, { hoverOn: true });
+                        }
+                    });
+                    this.area = [];
+                    // console.log(book);
+                    clearHoursAndTimeStartEnd();
+                    pickToFalseClass(book, el);
                 }
 
                 if (book.pick == false) {
@@ -282,34 +341,35 @@ export default {
                     });
                 }
                 else if (this.area.length == 1) {
+
                     if (this.area[0]) {
 
-                        if (this.area[0].el.id != el.id) {
-                            // console.log(this.area)
-                            this.area.push({ el: el, book: book });
-                        }
-                        else if (this.area[0].el.id == el.id) {
-                            this.area.pop();
-                            clearTime();
-                            pickToFalseClass(book, el);
+                        this.area.push({ el: el, book: book });
+                        // if (this.area[0].el.id != el.id) {
+                        // console.log(this.area)
+                        // this.area.push({ el: el, book: book });
+                        // }
+                        if (this.area[0].el.id == el.id) {
+                            //* when user click the same area
+                            clearHoursAndTimeStartEnd();
+                            if (this.area[0].el.id == this.area[1].el.id) {
+                                pickToFalseClass(book, el, { hoverOff: true });
+                                this.area = [];
+                            }
+                            else {
+                                // this.area.pop();
+                                pickToFalseClass(book, el);
+                            }
                         }
                     }
                 }
                 else if (this.area.length >= 2) {
-                    this.booksData.forEach((eachBook, no) => {
-                        if (eachBook.state.toLowerCase() == 'empty') {
-                            const eachId = document.getElementById('id-book-' + no);
-                            pickToFalseClass(eachBook, eachId);
-                        }
-                    });
-                    this.area = [];
-                    clearTime();
-                    pickToFalseClass(book, el);
+                    clearAllEmptyArea();
+
                 }
 
                 if (this.area.length == 2) {
                     const extractNumberId = (_el) => {
-
                         let number = String(_el.id).split('-');
                         number = parseInt(number[2]);
                         // console.log(number);
@@ -329,12 +389,23 @@ export default {
 
                     this.total_hour = (length - startIndex) + 1;
 
+                    let isBreak = false;
                     for (let index = startIndex; index < length; index++) {
-                        const el = document.getElementById(`id-book-${index}`);
-                        pickToTrueClass(this.booksData[index], el);
-                        pickToTrueClass({ book: true }, el);
+                        const _el = document.getElementById(`id-book-${index}`);
+
+                        const _book = this.booksData[index];
+                        if (_book.state != 'empty') {
+                            // console.log('helle-not-empty');
+                            clearAllEmptyArea();
+                            isBreak = true;
+                            break;
+                        }
+
+                        pickToTrueClass(_book, _el);
+                        // pickToTrueClass({ book: true }, el);
                     }
 
+                    if (isBreak) return;
                     // let sortedArea = this.area;
                     // if (this.area.length != 0) {
                     // for (let index = 1; index < this.area.length; index++) {

@@ -2,8 +2,7 @@
 class="text-sm font-medium text-center text-gray-500  border-gray-200 dark:text-gray-400 dark:border-gray-700">
 <ul class="flex flex-wrap -mb-px">
 
-    @foreach ([['Track Book'=>'admin.home'],['Book Table'=> 'admin.sandbox']] as $tab )
-    {{-- @foreach ([['Track Book','#']] as $tab ) --}}
+    @foreach ([['Track Book'=>'admin.home'],['List Book'=> 'admin.sandbox'],['Log Book'=>'admin.log']] as $tab )
         <li class="mr-2">
             <a
              href="{{route($tab[key($tab)])}}"
@@ -15,27 +14,5 @@ class="text-sm font-medium text-center text-gray-500  border-gray-200 dark:text-
             </a>
         </li>
     @endforeach
-
-    {{-- <li class="mr-2">
-        <a href="#"
-
-            class="inline-block p-4 rounded-t-lg border-b-2 border-transparent ">Settings</a>
-    </li>
-    <li class="mr-2">
-        <a href="#"
-            class="inline-block p-4 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300">
-            Book Table
-        </a>
-    </li> --}}
-    <li class="mr-2">
-        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-            @csrf
-            <button type="submit"
-                class="inline-block p-4 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300">
-                Log Out
-            </button>
-        </form>
-    </li>
-
 </ul>
 </div>
