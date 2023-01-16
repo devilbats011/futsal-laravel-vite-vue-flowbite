@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Models\Log;
 use App\Models\Book;
+use App\Models\Court;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Log;
 
 class AdminController extends Controller
 {
@@ -16,18 +17,31 @@ class AdminController extends Controller
         $this->middleware('admin');
     }
 
-    private function secretAdminCode()
+    // private function secretAdminCode()
+    // {
+    //     return mt_rand(1000, 9999) . "-" . strtoupper(Str::random(4));
+    // }
+
+    public function adminCourts()
     {
-        return mt_rand(1000, 9999) . "-" . strtoupper(Str::random(4));
+        $courts = Court::all()->sortBy('number');
+        return view('admin.admin-courts', compact('courts'));
     }
+
+
 
     public function index()
     {
         return view('admin');
     }
 
-    public function sandbox()
+    public function sandbox(Request $request)
     {
+        $filter = $request->filter;
+        $data = $request->data;
+        $data_type = $request->data_type;
+
+        // dump($filter,$data);
         $secret = '';
         /** @var \App\Models\User $user */
         $user = auth()->user();
@@ -36,15 +50,47 @@ class AdminController extends Controller
             $user->secret =  $secret;
             $user->save();
         }
-
-        $books = Book::With('anonymous')->with('court')->paginate(5);
-        // dd($books);
-
-        return view('admin.admin-list-book', [ 'secretAdminCode' => $secret,'books'=> $books ]);
+        //    With('anonymous')
+        $books = Book::WhereHas('anonymous', function ($query) use ($filter, $data, $data_type) {
+            if ($filter) {
+                switch ($data_type) {
+                    case 'name':
+                        return  $query->where('name','like', "%".$data."%");
+                    case 'phone_no':
+                        return  $query->where('phone_no','like', "%".$data."%");
+                    case 'email':
+                        return  $query->where('email','like', "%".$data."%");
+                }
+            }
+        })
+            ->whereHas('court', function ($query) use ($filter, $data, $data_type) {
+                if ($filter) {
+                    switch ($data_type) {
+                        case 'number':
+                            return  $query->where('number', $data);
+                    }
+                }
+                // return $query->get();
+            })
+            ->when($filter, function ($query) use ($data, $data_type) {
+                switch ($data_type) {
+                    case 'book_date':
+                        return $query->where('book_date','like', "%".$data."%");
+                        break;
+                }
+            })
+            ->paginate(5);
+        $books->appends([
+            'filter' => $filter,
+            'data' => $data,
+            'data_type' => $data_type,
+        ]);
+        return view('admin.admin-list-book', ['secretAdminCode' => $secret, 'books' => $books]);
     }
 
-    public function log() {
-        $logs = Log::query()->paginate(10);
-        return view('admin.admin-log',compact('logs'));
-    }
+    // public function log()
+    // {
+    //     $logs = Log::query()->paginate(10);
+    //     return view('admin.admin-log', compact('logs'));
+    // }
 }

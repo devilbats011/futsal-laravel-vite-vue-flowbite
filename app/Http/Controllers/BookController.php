@@ -242,7 +242,7 @@ class BookController extends Controller
     public function paymentBookOption(Book $book)
     {
         if ($book->state != 'pending') {
-            return redirect()->route('courts.home');
+            return redirect()->route('courts.index');
         }
         return view('payment', [
             'book' => $book

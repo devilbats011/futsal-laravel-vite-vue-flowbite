@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CourtController;
+use App\Models\Court;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\Auth;
 Route::prefix('test')->group(function (){
     Route::get('/a', function ()
     {
+        dd(Court::Create([]));
         dd(Auth::user());
         dump(route('real.home'),URL('futsal-logo.jpg'),auth()->check());
         // dump(mt_rand(1000, 9999)."-".strtoupper(Str::random(4)));
@@ -37,9 +39,10 @@ Route::prefix('test')->group(function (){
         dd(route("payment.success",['id'=> 1,GenerateSomeSaltyRandomCode()]));
     });
     Route::get('/c',function () {
-
-        $book = Book::find(1);
-        return redirect()->route('payment.success', [$book,$book->book_number]);
+        session()->flash('message','test messages');
+        return view('sandbox');
+        // $book = Book::find(1);
+        // return redirect()->route('payment.success', [$book,$book->book_number]);
         // echo route('payment.success', [$book,$book->book_number]);
     });
     Route::get('/d',function () {
@@ -63,8 +66,9 @@ Route::controller(App\Http\Controllers\AdminController::class)->group(function (
     Route::prefix('admin')->group(function () {
         Route::name('admin.')->group(function () {
             Route::get('/', [App\Http\Controllers\Auth\AdminController::class, 'index'])->name('home');
+            Route::get('/courts', [App\Http\Controllers\Auth\AdminController::class, 'adminCourts'])->name('courts');
             Route::get('/sandbox', [App\Http\Controllers\Auth\AdminController::class, 'sandbox'])->name('sandbox');
-            Route::get('/log', [App\Http\Controllers\Auth\AdminController::class, 'log'])->name('log');
+            // Route::get('/log', [App\Http\Controllers\Auth\AdminController::class, 'log'])->name('log');
         });
     });
 });
@@ -73,9 +77,9 @@ Route::controller(App\Http\Controllers\UserController::class)->group(function ()
     Route::get('/home', 'index')->name('home');
 
 });
-// Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::get('courts',[CourtController::class,'courts'])->name('courts.home');
+// Route::get('courts',[CourtController::class,'courts'])->name('courts.home');
+Route::resource('courts',CourtController::class);
 
 Route::controller(App\Http\Controllers\BookController::class)->group(function () {
     Route::prefix('book')->group(function () {

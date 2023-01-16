@@ -11,3 +11,8 @@ export function HconvertTo12hoursFormat(hours) {
     const finalTime = hours + AmOrPm;
     return finalTime;
 }
+
+export function HstringToObjectConverter(obj,stringObj) {
+    obj = JSON.parse(stringObj);
+    return obj;
+}

@@ -12,7 +12,8 @@ import loginComponent from "./components/Login.vue";
 import courtComp from "./components/Courts.vue";
 import bookListComp from "./components/BookList.vue";
 import bookComp from "./components/Book.vue";
-import { HtoUpperCaseFirstLetter,HconvertTo12hoursFormat } from "./helpers";
+import adminTabs from "./components/AdminTabs.vue";
+import { HtoUpperCaseFirstLetter,HconvertTo12hoursFormat,HstringToObjectConverter } from "./helpers";
 
 const app = createApp({});
 
@@ -20,6 +21,7 @@ const addGlobalHelperToVueApp = () => {
     //? https://stackoverflow.com/questions/63100658/add-global-variable-in-vue-js-3
     app.config.globalProperties.$toUpperCaseFirstLetter = HtoUpperCaseFirstLetter;
     app.config.globalProperties.$convertTo12hoursFormat = HconvertTo12hoursFormat;
+    app.config.globalProperties.$stringToObjectConverter = HstringToObjectConverter;
 }
 
 const route = () => {
@@ -47,6 +49,7 @@ const route = () => {
     app.component('courts',courtComp);
     app.component('book-list',bookListComp);
     app.component('book',bookComp);
+    app.component('admin-tabs',adminTabs);
 
 };
 
