@@ -5,7 +5,7 @@
         {{--? https://play.tailwindcss.com/img/grid.svg --}}
         {{-- <div class="w-72 h-72 bg-white bg-opacity-20 backdrop-blur-lg rounded drop-shadow-lg"></div> --}}
         <div
-            class="bottom-9 relative bg-transparent px-6 pt-6 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10 " >
+            class="mx-3 bottom-9 relative bg-transparent px-6 pt-6 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10 " >
             <div class="absolute w-full h-full  bg-white top-0 right-0 opacity-40 backdrop-blur-xl z-0"></div>
             <div class="mx-auto max-w-md relative z-10 text-[#004157] ">
                 <div class="divide-y divide-gray-300/50">

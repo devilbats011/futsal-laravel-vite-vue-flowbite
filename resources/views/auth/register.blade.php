@@ -12,6 +12,7 @@
                         <div>
                             <div class="">
                                 {{-- <div class="card-header">{{ __('Register') }}</div> --}}
+                                {{-- TODO: LETAK INPUT PhoneNo Juga --}}
                                 <div class="">
                                     <form method="POST" action="{{ route('register') }}" class="space-y-5">
                                         @csrf
@@ -23,72 +24,97 @@
                                         </h5>
 
                                         <div class="">
-                                            <label for="name"
-                                                class="col-md-4 col-form-label text-md-end">{{ __('Name') }}</label>
+                                            {{-- <label for="name"
+                                                class="col-md-4 col-form-label text-md-end">{{ __('Name') }}</label> --}}
 
-                                            <div class="col-md-6">
-                                                <input id="name" type="text"
+                                            {{-- <div class="col-md-6"> --}}
+                                            {{-- <input id="name" type="text"
                                                     class="form-control @error('name') is-invalid @enderror" name="name"
-                                                    value="{{ old('name') }}" required autocomplete="name" autofocus>
-
-                                                @error('name')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
-                                                @enderror
-                                            </div>
+                                                    value="{{ old('name') }}" required autocomplete="name" autofocus> --}}
+                                            @include('components.form-input-auth', [
+                                                'title' => __('Name'),
+                                                'type' => 'text',
+                                                'input' => 'name',
+                                                'placeholder' => ' ',
+                                            ])
+                                            @error('name')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                            @enderror
+                                            {{-- </div> --}}
                                         </div>
 
                                         <div class="">
-                                            <label for="email"
+                                            {{-- <label for="email"
                                                 class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
 
                                             <div class="col-md-6">
                                                 <input id="email" type="email"
                                                     class="form-control @error('email') is-invalid @enderror" name="email"
-                                                    value="{{ old('email') }}" required autocomplete="email">
-
-                                                @error('email')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
-                                                @enderror
-                                            </div>
+                                                    value="{{ old('email') }}" required autocomplete="email"> --}}
+                                            @include('components.form-input-auth', [
+                                                'title' => __('Email Address'),
+                                                'type' => 'email',
+                                                'input' => 'email',
+                                                'placeholder' => ' ',
+                                            ])
+                                            @error('email')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                            @enderror
+                                            {{-- </div> --}}
                                         </div>
 
                                         <div class="">
-                                            <label for="password"
+                                            {{-- <label for="password"
                                                 class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
 
                                             <div class="col-md-6">
                                                 <input id="password" type="password"
                                                     class="form-control @error('password') is-invalid @enderror"
-                                                    name="password" required autocomplete="new-password">
+                                                    name="password" required autocomplete="new-password"> --}}
+                                            @include('components.form-input-auth', [
+                                                'title' => __('Password'),
+                                                'type' => 'password',
+                                                'input' => 'password',
+                                                'placeholder' => ' ',
+                                            ])
 
-                                                @error('password')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
-                                                @enderror
-                                            </div>
+                                            @error('password')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                            @enderror
+                                            {{-- </div> --}}
                                         </div>
 
                                         <div class="">
-                                            <label for="password-confirm"
+
+                                            @include('components.form-input-auth', [
+                                                'title' => __('Confirm Password'),
+                                                'type' => 'password',
+                                                'input' => 'password_confirmation',
+                                                'placeholder' => ' ',
+                                            ])
+
+                                            {{-- <label for="password-confirm"
                                                 class="col-md-4 col-form-label text-md-end">{{ __('Confirm Password') }}</label>
 
                                             <div class="col-md-6">
                                                 <input id="password-confirm" type="password" class="form-control"
                                                     name="password_confirmation" required autocomplete="new-password">
-                                            </div>
+                                            </div> --}}
                                         </div>
 
                                         <div class="mb-0">
                                             <div class="">
-                                                <button type="submit"
+                                                @include('components.form-button-submit-auth',['name'=> __('Register') ])
+                                                {{-- <button type="submit"
                                                     class="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">
                                                     {{ __('Register') }}
-                                                </button>
+                                                </button> --}}
                                             </div>
                                         </div>
                                     </form>
