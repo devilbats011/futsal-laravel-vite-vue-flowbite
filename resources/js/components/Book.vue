@@ -1,11 +1,46 @@
 <template>
     <main>
-        <!-- xxx-->
-        <br>
-        Errors:
-        {{ errors }}
+
+
+
         <!-- {{dataCourt.id}} -->
         <div class="overflow-x-auto relative mt-5  rounded">
+                   <!-- xxx-->
+        <ol
+            class="flex items-center w-full text-sm font-semibold text-center text-gray-500 dark:text-gray-400 sm:text-base">
+            <li
+                class="flex md:w-full items-center text-blue-600 dark:text-blue-500 sm:after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 dark:after:border-gray-700">
+                <!-- <div> -->
+                    <span
+                        class="flex items-center after:content-['/'] sm:after:hidden  after:font-light after:text-gray-200 dark:after:text-gray-500">
+                        <!-- <svg aria-hidden="true" class="w-5 h-5 mx-1" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd"></path>
+                        </svg> -->
+                        <span class="mr-2">1</span>
+                        Booking  <span class="hidden sm:inline-flex sm:ml-2"> Time</span>
+                    </span>
+                <!-- </div> -->
+            </li>
+            <li
+                class="flex md:w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:border-1 after:hidden sm:after:inline-block after:mx-3 xl:after:mx-10 dark:after:border-gray-700">
+                <span
+                    class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:font-light after:text-gray-200 dark:after:text-gray-500">
+                    <span class="mr-2">2</span>
+                    Account <span class="hidden sm:inline-flex sm:ml-2">Info</span>
+                </span>
+            </li>
+            <li class="flex items-center">
+                <span class="mr-2">3</span>
+                Confirmation
+            </li>
+        </ol>
+        <!-- xxx -->
+            <br>
+            Errors:
+            {{ errors }}
             <div class="mb-3 flex gap-x-4">
                 <h1 class="text-lg relative top-[.5rem]"> Book Court {{ computedCourt.number }} Avaibility </h1>
                 <form action="" class="flex gap-x-2">
@@ -21,7 +56,7 @@
                 </form>
             </div>
             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-100 border border-gray-200">
                     <tr>
                         <!-- ,'Detail''Pick', -->
                         <th scope="col" class="py-3 px-6" v-for="th in ['No', 'Time Start', 'Time End', 'Status']">
@@ -30,15 +65,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="dark:bg-gray-800 dark:border-gray-700 border" :class="trClassBehaviour(book)"
-                        v-for="book, no in booksData" @click="(event) => clickBook(book, event)" :id="'id-book-' + no">
+                    <!-- dark:bg-gray-800 dark:border-gray-700 -->
+                    <tr class="border bg-white" :class="trClassBehaviour(book)" v-for="book, no in booksData"
+                        @click="(event) => clickBook(book, event)" :id="'id-book-' + no">
                         <td class="py-4 px-6">
                             {{ no+ 1 }}
                         </td>
                         <!--  v-model="book.pick" -->
                         <!-- <td class="py-4 px-6 text-base">
                             {{ book.pick }}
-
                         </td> -->
                         <td class="py-4 px-6">
                             {{ $convertTo12hoursFormat(book.time_book_start) }}
@@ -72,7 +107,6 @@
                     Date Booking
                 </label>
             </div>
-
 
             <div class="grid md:grid-cols-2 md:gap-6">
                 <div class="relative z-0 mb-6 w-full group">
@@ -158,15 +192,15 @@ import moment from 'moment';
 export default {
     mounted() {
 
- this.name = this.oldName ?? '?-?';
-console.log(typeof this.oldEmail,this.oldEmail == '');
+        this.name = this.oldName ?? '?-?';
+        console.log(typeof this.oldEmail, this.oldEmail == '');
 
         //* Mount User, Name, Phone ,Email
         if (this.user) {
             this.dataUser = JSON.parse(this.user);
             this.name = this.oldName ? this.oldName : this.dataUser.name;
             this.phoneNo = this.oldPhoneNo ? this.oldPhoneNo : this.dataUser.phone_no;
-            this.email = this.oldEmail ? this.oldEmail : this.dataUser.email ;
+            this.email = this.oldEmail ? this.oldEmail : this.dataUser.email;
         }
         else {
             // console.log('%c this.user == ""','color: orange',this.user == "");
@@ -278,7 +312,7 @@ console.log(typeof this.oldEmail,this.oldEmail == '');
                 const pickToTrueClass = (_book, _el) => {
                     _book.pick = true;
                     _el.classList.remove('bg-white',);
-                    _el.classList.add('bg-slate-700', 'text-slate-100');
+                    _el.classList.add('bg-slate-700', 'text-slate-100', 'border-gray-700');
                 }
 
                 const pickToFalseClass = (_book, _el, option = null) => {
@@ -286,23 +320,23 @@ console.log(typeof this.oldEmail,this.oldEmail == '');
                     if (option) {
                         if (option.hoverOff) {
                             //'hover:bg-slate-700', 'hover:text-slate-100', 'hover:border-slate-500',
-                            _el.classList.remove( 'hover:text-base');
+                            _el.classList.remove('hover:text-base');
                             setTimeout(() => {
                                 //'hover:bg-slate-700', 'hover:text-slate-100', 'hover:border-slate-500',
-                                _el.classList.add( 'hover:text-base');
+                                _el.classList.add('hover:text-base');
                             }, 1700);
                         }
 
                         // just incase...
                         if (option.hoverOn) {
                             //'hover:bg-slate-700', 'hover:text-slate-100', 'hover:border-slate-500',
-                            _el.classList.add( 'hover:text-base');
+                            _el.classList.add('hover:text-base');
                         }
                     }
 
                     _book.pick = false;
                     _el.classList.add('bg-white');
-                    _el.classList.remove('bg-slate-700', 'text-slate-100');
+                    _el.classList.remove('bg-slate-700', 'text-slate-100', 'border-gray-700');
                 }
 
                 const clearHoursAndTimeStartEnd = () => {

@@ -23,3 +23,7 @@ function convertTo12hoursFormat($hoursRaw) {
     $finalTime = $hours . $AmOrPm;
     return $finalTime;
 }
+
+function totalHours ($start,$end) {
+    return intval($end) - intval($start);
+}

@@ -3,7 +3,7 @@
 @section('content')
     {{-- https://flowbite.com/blocks/marketing/register/ --}}
     <main
-        class="relative bg-transparent px-6 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10 ">
+        class="-bottom-6 relative bg-transparent px-6 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10 ">
         <div class="absolute w-full h-full  bg-white top-0 right-0 opacity-40 backdrop-blur-xl z-0"></div>
         <div class="mx-auto max-w-md relative z-10 text-[#004157] ">
             <div class="divide-y divide-gray-300/50">
@@ -12,7 +12,6 @@
                         <div>
                             <div class="">
                                 {{-- <div class="card-header">{{ __('Register') }}</div> --}}
-                                {{-- TODO: LETAK INPUT PhoneNo Juga --}}
                                 <div class="">
                                     <form method="POST" action="{{ route('register') }}" class="space-y-5">
                                         @csrf
@@ -20,8 +19,10 @@
                                             Malaya</h3>
                                         <img src="{{ URL('futsal-logo.jpg') }}" alt="futsal-logo" class="w-[330px]">
                                         <h5 class="text-lg font-medium text-gray-800 dark:text-white">
-                                            Create Account
+                                            Create An Account
                                         </h5>
+
+
 
                                         <div class="">
                                             {{-- <label for="name"
@@ -37,6 +38,29 @@
                                                 'input' => 'name',
                                                 'placeholder' => ' ',
                                             ])
+                                            @error('name')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                            @enderror
+                                            {{-- </div> --}}
+                                        </div>
+
+                                        <div class="">
+                                            {{-- <label for="name"
+                                                class="col-md-4 col-form-label text-md-end">{{ __('Name') }}</label> --}}
+
+                                            {{-- <div class="col-md-6"> --}}
+                                            {{-- <input id="name" type="text"
+                                                    class="form-control @error('name') is-invalid @enderror" name="name"
+                                                    value="{{ old('name') }}" required autocomplete="name" autofocus> --}}
+                                            @include('components.form-input-auth', [
+                                                'title' => 'Phone Number',
+                                                'type' => 'text',
+                                                'input' => 'phone_no',
+                                                'placeholder' => '0123456789',
+                                            ])
+
                                             @error('name')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>

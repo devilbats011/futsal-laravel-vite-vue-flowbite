@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Payment extends Model
 {
+    protected $guarded = [];
     use HasFactory;
 
     //? noun not plural
@@ -21,8 +22,8 @@ class Payment extends Model
     {
         static::updated(function ($model) {
             if (in_array($model->payment_status, ['counter', 'success'])) {
-                // * book->state usually display to users about the Status/State of booking
-                if ($model->state != 'booked') $model->update(['state' => 'booked']);
+                // * book->state display to users about the Status/State of booking
+                if ($model->book->state != 'booked')  $model->book->update(['state' => 'booked']);
             }
         });
 

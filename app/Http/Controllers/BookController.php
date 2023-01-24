@@ -17,8 +17,7 @@ use Illuminate\Support\Facades\Session;
 
 class BookController extends Controller
 {
-
-
+    // todo: put baseBookcontroller and remove bookValidation function
 
     public function apiBooks()
     {
@@ -128,8 +127,8 @@ class BookController extends Controller
                     //     // check start and end should be at least one hour apart..cannot the same
                     //     // check if time_book change to CARBON then compare with b_end (time_book_carbon_end >= b_start && time_book_carbon_end <= b_end)
                     $booksCollection = Book::Where('court_id', $request->court_id)
-                    ->where('book_date', $request->book_date)
-                    ->get();
+                        ->where('book_date', $request->book_date)
+                        ->get();
                     $booksCollection->each(function ($item, $key) use ($time_book_start, $time_book_end, $fail) {
                         // $time_book_start = $value;
                         $item_time_book_start = $item->time_book_start;
@@ -137,11 +136,9 @@ class BookController extends Controller
 
                         if ($time_book_start > $item_time_book_start && $time_book_start < $item_time_book_end) {
                             return $fail('The time book has already been taken.01');
-                        }
-                        else if ($time_book_start < $item_time_book_start && $time_book_end > $item_time_book_end) {
+                        } else if ($time_book_start < $item_time_book_start && $time_book_end > $item_time_book_end) {
                             return $fail('The time book has already been taken.011');
-                        }
-                        else if($time_book_end > $item_time_book_start && $time_book_end < $item_time_book_end) {
+                        } else if ($time_book_end > $item_time_book_start && $time_book_end < $item_time_book_end) {
                             return $fail('The time book has already been taken.02');
                         }
                     });
@@ -177,7 +174,7 @@ class BookController extends Controller
                     //     });
                 },
             ],
-            'name' => ['required'],
+            'name' => ['required', 'required|regex:/^[a-zA-Z\s\']+$/'],
             //? https://ihateregex.io/expr/phone/
             'phone_no' => 'required|regex:/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/',
             'email' => ['required', 'email'],
@@ -222,27 +219,22 @@ class BookController extends Controller
         } catch (\Throwable $e) {
             $error = $e->getMessage();
         }
-        if (!$isSave) {
-            // todo: redirect or back to somewhere more suitable later on..
-            dd('something went wrong book not save');
-        }
+        abort_if( !$isSave,500,"something went wrong book not save");
+        // if (!$isSave) {
+        //     dd('something went wrong book not save');
+        // }
 
         Session::flash("message", "Book Created");
         return redirect()->route('book.payment', [$book]);
-        //! bad practice to use view for route post !
-        // return view('sandbox', [
-        //     'is_save' => $isSave,
-        //     'book_id' => $book->id,
-        //     'message' => $message,
-        //     'error' => $error,
-        // ]);
+
     }
 
     # get route('book.payment', [$book]); / route('book.payment');
     public function paymentBookOption(Book $book)
     {
         if ($book->state != 'pending') {
-            return redirect()->route('courts.index');
+            // return redirect()->route('courts.index');
+            return back();
         }
         return view('payment', [
             'book' => $book
@@ -273,8 +265,28 @@ class BookController extends Controller
             $session = $stripe->checkout->sessions->retrieve($r->session_id);
             $customer = $stripe->customers->retrieve($session->customer);
             // dd($session, $customer);
-
+            $payload = [
+                'book' => $book,
+                'data' => $data,
+                'customer' => $customer,
+            ];
             return view('success', $payload);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+
+    # GET route('payment.cancel);
+    public function paymentCancel( Request $r,Book $book, $data = null)
+    {
+        // TODO: Cancel flow ( if cancel, delete booking , if booking arent pay for the next 30 minutes, the system will automaticlu cancel it) AND cantikkan css cancel and letak details yg sesuai..
+        try {
+            $payload = ['data' => $data];
+            if (!$r->session) {
+                return view('cancel', $payload);
+            }
+
         } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
@@ -286,13 +298,27 @@ class BookController extends Controller
     {
         $validate_data = $request->validate(['payment_method' => 'required']);
 
+        //? ini utk yg go back to this page and for people who not have yet fulfill their payment successfully or still have other option to go counter or online..
         if ($book->payment) {
-            if (in_array($book->payment->payment_status, ['pending', 'fail'])) {
-                return redirect()->route('payment.stripe');
-            }
+            $payment = $book->payment;
+            //? success abort sbb paymnet dh success | counter abort sbb dh janji bayar kt counter can't go back to other option except delete it
+            abort_if(in_array($payment->payment_status,['success','counter']),403,'Forbidden');
+
+                if( $validate_data['payment_method'] == 'online') {
+                    $book->update(['state'=>'pending']);
+                    $payment->update(['online_gateway_name'=> 'stripe','payment_status'=>'pending','payment_method' => 'online']);
+                    return redirect()->route('payment.stripe',$book);
+                }
+                else if ($validate_data['payment_method'] == 'counter' )
+                {
+                    $payment->update(['online_gateway_name'=> null,'payment_status'=>'counter','payment_method' => 'counter']);
+                    Session::flash('message', "payment status : Success Pay At Counter");
+                    return redirect()->route('payment.success', [$book, $book->book_number]);
+                }
 
             $payment_status = $book->payment->payment_status;
-            if (in_array($payment_status, ['counter', 'success'])) {
+            if (in_array($payment_status, ['counter', 'success']) ) {
+
                 Session::flash('message', "payment status : Already Flash {$payment_status}");
                 return redirect()->route('payment.success', [$book, $book->book_number]);
             }
@@ -301,17 +327,17 @@ class BookController extends Controller
         $payment = new Payment;
         $payment_method = strtolower($validate_data['payment_method']);
         if ($payment_method == 'counter') {
+
             $payment->payment_method = 'counter';
             $payment->payment_status = 'counter';
-            //todo: maybe put book->status at observer or model event iself(updating/updated mybe...)
             // $book->update(['state'=>'booked']);
             $book->payment()->save($payment);
             Session::flash('message', "payment status : Success flash {$payment_method}");
             return redirect()->route('payment.success', [$book, $book->book_number]);
         } else if ($payment_method == 'online') {
             $payment->payment_method = 'online';
-            $payment->online_gateway_name = 'stripe';
             $payment->payment_status = 'pending';
+            $payment->online_gateway_name = 'stripe';
             $book->payment()->save($payment);
             return redirect()->route('payment.stripe');
         }
@@ -322,8 +348,7 @@ class BookController extends Controller
     # Put route('book.edit);
     public function updateBook(Book $book, Request $request)
     {
-        // todo: validation lassttt - will check sekali create book.
-
+        // todo:  requirement: add total hours limition validation : user can edit times but cant change total duration of hours(time)
         // $v = $request->validate([
         //     'court_number' => ['required'],
         //     'time_book_start' => ['required'],
@@ -351,10 +376,13 @@ class BookController extends Controller
         }
     }
 
-    // https://medium.com/@laraveltuts/laravel-9-stripe-payment-gateway-integration-example-79b17969b6eb
-    public function stripe()
+    # Get
+    // route('payment.stripe');
+    // ? https://medium.com/@laraveltuts/laravel-9-stripe-payment-gateway-integration-example-79b17969b6eb
+    public function stripe(Book $book)
     {
-        return view('stripe');
+        abort_if($book->state != 'pending', 403, 'Forbidden');
+        return view('stripe', compact('book'));
     }
 
     /**
@@ -362,8 +390,9 @@ class BookController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function stripePost(Request $request)
+    public function stripePost(Request $request, Book $book)
     {
+
         Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
         $customer = Stripe\Customer::create(array(
             "address" => [
@@ -403,33 +432,30 @@ class BookController extends Controller
     //? https://stripe.com/docs/api/checkout/sessions
     //? https://stripe.com/docs/payments/accept-a-payment?platform=web&ui=checkout
     //? https://stripe.com/docs/payments/checkout/custom-success-page
-    public function stripe_v3(Request $r)
+    public function stripe_v3(Request $r, Book $book)
     {
         // = Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
         $stripe = new Stripe\StripeClient('sk_test_wVr5bhfz0lPTQb6uG2RxsojZ');
-
+        $totalHour = totalHours($book->time_book_start, $book->time_book_end);
         $checkout_session = $stripe->checkout->sessions->create([
-            'customer_email' => 'wan@example.com',
+            'customer_email' => $book->anonymous->email,
             'submit_type' => 'book', //? https://stripe.com/docs/api/checkout/sessions/create#create_checkout_session-submit_type
-            // 'billing_address_collection' => 'required',
-            // 'shipping_address_collection' => [
-            //     'allowed_countries' => ['MY'], //,'US', 'CA'
-            // ],
             'line_items' => [[
                 'price_data' => [
-                    'currency' => 'myr', //'usd',
+                    'currency' => 'myr',
                     'product_data' => [
-                        'name' => 'Book Court X',
+                        'name' => "Book Court {$book->court->number}",
+                        "description" => "Total Hour: {$totalHour} | Type Floor : {$book->court->type_floor} | RM/Hour: {$book->court->hour_rate}",
                     ],
-                    'unit_amount' => 2000,
+                    'unit_amount' => "{$book->court->hour_rate}00",
                 ],
                 'quantity' => 1,
             ]],
             'mode' => 'payment',
             // 'success_url' => 'http://localhost:8000/payment-success?session_id={CHECKOUT_SESSION_ID}"',
-            'success_url' => route("payment.success", [GenerateSomeSaltyRandomCode()]) . '?session_id={CHECKOUT_SESSION_ID}', // "http://localhost:8000/payment/success?session_id={CHECKOUT_SESSION_ID}"
+            'success_url' => route("payment.success", [$book->book_number]) . '?session_id={CHECKOUT_SESSION_ID}', // "http://localhost:8000/payment/success?session_id={CHECKOUT_SESSION_ID}"
             // 'cancel_url' => 'http://localhost:8000/payment-cancel',
-            'cancel_url' => route("payment.cancel"),
+            'cancel_url' => route("payment.cancel",$book),
         ]);
 
         //? https://laravel.com/docs/9.x/responses#redirecting-external-domains

@@ -2,14 +2,15 @@
 
 use Carbon\Carbon;
 use App\Models\Book;
+use App\Models\User;
+use App\Models\Court;
 use App\Jobs\SendEmail;
 use App\Mail\BookNumber;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CourtController;
-use App\Models\Court;
-use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,9 +22,46 @@ use Illuminate\Support\Facades\Auth;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+// ! this does not work because two model binding (laravel limitation)
+Route::get('testing-route/{user}/{book}/a', function (Book $book,User $user)
+{
+    dump($book,$user);
+    echo true;
+
+})->name('test.a.route');
+
+// ! this route DOES NOT WORK / error because model binding work only place it at the front, (laravel limitation)
+Route::get('testingroute/b/{b}/{book}', function (Book $book)
+{
+    dump($book);
+    echo true;
+
+})->name('test.b.route');
+
+
+// ! model binding working because place it at the front
+Route::get('testingroute/{book}/{c}/c', function (Book $book)
+{
+    dump($book);
+    echo true;
+
+})->name('test.c.route');
+
 Route::prefix('test')->group(function (){
+    Route::get('/aa', function ()
+    {
+
+        // dump(route('test.a.route',['user'=>1,'book'=>1]));
+        // dump(route('test.b.route',[1,'b'=>1]).'?-extra-string-2');
+
+        dump(route('test.c.route',[1,'c'=>1]).'?-extra-string-3');
+        dump(route('test.c.route',['book'=>1,'c'=>1]).'?-extra-string-3');
+    });
+
     Route::get('/a', function ()
     {
+
         dd(Court::Create([]));
         dd(Auth::user());
         dump(route('real.home'),URL('futsal-logo.jpg'),auth()->check());
@@ -98,11 +136,11 @@ Route::controller(App\Http\Controllers\BookController::class)->group(function ()
 
 Route::prefix('payment')->group(function() {
     Route::get('/success/{book}/{data?}',[App\Http\Controllers\BookController::class, 'paymentSuccess'])->name('payment.success');
-    Route::get('/cancel/{data?}',[App\Http\Controllers\BookController::class, 'paymentSuccess'])->name('payment.cancel');
-    Route::get('/stripe',[App\Http\Controllers\BookController::class, 'stripe'])->name('payment.stripe');
+    Route::get('/cancel/{book}/{data?}',[App\Http\Controllers\BookController::class, 'paymentCancel'])->name('payment.cancel');
+    Route::get('/stripe/{book}',[App\Http\Controllers\BookController::class, 'stripe'])->name('payment.stripe');
 });
 
-Route::post('/create-checkout-session',[App\Http\Controllers\BookController::class, 'stripe_v3'])->name('payment.stripe.v3');
+Route::post('/create-checkout-session/{book}',[App\Http\Controllers\BookController::class, 'stripe_v3'])->name('payment.stripe.v3');
 
 // Route::get('/test',[App\Http\Controllers\BookController::class, 'paymentSuccess'])->name('test.test');
 // Route::get('/test-stripe',[App\Http\Controllers\BookController::class, 'stripe'])->name('test.stripe');

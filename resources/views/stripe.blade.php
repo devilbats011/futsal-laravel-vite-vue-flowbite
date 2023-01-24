@@ -1,171 +1,145 @@
 @extends('layouts.play')
 
 @section('content-play')
-    {{-- <div class="container">
+    {{-- ? https://flowbite.com/docs/components/card/#pricing-card --}}
+    {{-- ? https://flowbite.com/application-ui/demo/e-commerce/invoice/# --}}
+    <section class="my-5 mx-8">
 
-        <h2 class="text-center">Laravel 9 Stripe Payment Gateway Integration Example - LaravelTuts.com</h2>
-
-        <div class="row">
-            <div class="col-md-7 col-md-offset-3">
-                <div class="panel panel-default credit-card-box">
-                    <div class="panel-heading display-table">
-                        <h3 class="panel-title text-center"><strong>Payment Details</strong></h3>
+        <div class="my-3">
+            @include('components.breadcrumbs', [
+                'data' => [
+                    ['name' => 'Courts', 'route' => route('courts.index')],
+                    ['name' => 'Payment Method', 'route' => route('book.payment', 1)],
+                    ['name' => 'Checkout', 'current' => true],
+                ],
+            ])
+        </div>
+        {{-- class=""
+        max-w-sm hover:bg-gray-100
+        --}}
+        <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 ">
+            <div class="relative overflow-x-auto">
+                <div class="flex flex-col mb-5 mt-3">
+                    <div class="text-right">
+                        <h1 class="font-extrabold text-gray-900 px-2 space-y-2">
+                            <span class="text-3xl">
+                                Invoice #00{{ $book->id }}
+                            </span>
+                            <p class="text-xl text-gray-800"> Booking Court {{ $book->court->number }} </p>
+                        </h1>
                     </div>
-                    <div class="panel-body">
+                    <div class=" flex md:justify-start my-3">
+                        <h1 class="text-lg font-extrabold text-gray-800 px-1">
+                            {{-- <table class="text-lg font-extrabold text-gray-800 px-1">
+                                <tr>
+                                    <td class="text-right">  <span class="font-semibold text-right"> Name: </span> </td>
+                                    <td> {{$book->anonymous->name}}</td>
+                                </tr>
 
-                        @if (Session::has('success'))
-                            <div class="alert alert-success text-center">
-                                <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
-                                <p>{{ Session::get('success') }}</p>
-                            </div>
-                        @endif
+                                <tr>
+                                    <td class="text-right"></td>  <span class="font-semibold"> email: </span> </td>
+                                    <td> {{$book->anonymous->email}}</td>
+                                </tr>
 
-                        <form role="form" action="{{ route('book.stripe.post') }}" method="post"
-                            class="require-validation" data-cc-on-file="false"
-                            data-stripe-publishable-key="{{ env('STRIPE_KEY') }}" id="payment-form">
-                            @csrf
+                                <tr>
+                                    <td >  <span class="font-semibold"> Phone Number: </span> </td>
+                                    <td> {{$book->anonymous->phone_no}}</td>
+                                </tr>
+                            </table> --}}
+                            <p><span class="font-semibold">Name:</span> {{ $book->anonymous->name }}</p>
+                            <p><span class="font-semibold">Email: </span>{{ $book->anonymous->email }}</p>
+                            <p><span class="font-semibold">Phone Number: </span>{{ $book->anonymous->phone_no }}</p>
+                        </h1>
 
-                            <div class='form-row row'>
-                                <div class='col-xs-12 form-group required'>
-                                    <label class='control-label'>Name on Card</label>
-                                    <input class='form-control' size='4' type='text'>
-                                </div>
-                            </div>
 
-                            <div class='form-row row'>
-                                <div class='col-xs-12 form-group card required'>
-                                    <label class='control-label'>Card Number</label>
-                                    <input autocomplete='off' class='form-control card-number' size='20'
-                                        type='text'>
-                                </div>
-                            </div>
-
-                            <div class='form-row row'>
-                                <div class='col-xs-12 col-md-4 form-group cvc required'>
-                                    <label class='control-label'>CVC</label>
-                                    <input autocomplete='off' class='form-control card-cvc' placeholder='ex. 311'
-                                        size='4' type='text'>
-                                </div>
-                                <div class='col-xs-12 col-md-4 form-group expiration required'>
-                                    <label class='control-label'>Expiration Month</label> <input
-                                        class='form-control card-expiry-month' placeholder='MM' size='2'
-                                        type='text'>
-                                </div>
-                                <div class='col-xs-12 col-md-4 form-group expiration required'>
-                                    <label class='control-label'>Expiration Year</label>
-                                    <input class='form-control card-expiry-year' placeholder='YYYY' size='4'
-                                        type='text'>
-                                </div>
-                            </div>
-
-                            <div class='form-row row'>
-                                <div class='col-md-12 error form-group hide'>
-                                    <div class='alert-danger alert'>Please correct the errors and try again.</div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-xs-12">
-                                    <button class="btn btn-primary btn-lg btn-block" type="submit">Pay Now
-                                        ($100)</button>
-                                </div>
-                            </div>
-
-                        </form>
                     </div>
                 </div>
+                {{-- <hr class=" border-gray-400 mb-2"> --}}
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-900 uppercase dark:text-gray-400 border-b border-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">
+                                Floor Type
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                Rm / Hour
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                Start Time - End Time
+                            </th>
+                            {{-- <th scope="col" class="px-6 py-3">
+                                Total Hours
+                            </th> --}}
+                        </tr>
+                    </thead>
+                    <tbody class="border-gray-400 border-b">
+                        <tr class="bg-white dark:bg-gray-800">
+                            <th scope="row"
+                                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                {{ $book->court->type_floor }}
+                            </th>
+
+                            <th scope="row"
+                                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                {{ $book->court->hour_rate }}
+                            </th>
+                            <th scope="row"
+                                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                {{ $book->time_book_start }} - {{ $book->time_book_end }}
+                            </th>
+
+                        </tr>
+                        {{-- <tr class="bg-white dark:bg-gray-800">
+                        </tr>
+                        <tr class="bg-white dark:bg-gray-800">
+                        </tr> --}}
+                    </tbody>
+                </table>
+            </div>
+            {{-- <div class="md:px-5 my-2"></div> --}}
+
+            <div class="md:px-3 mt-8 mb-3 text-right space-y-3">
+                {{-- <hr class=" border-gray-400 mb-2"> --}}
+                <h2 class=" text-right px-2 text-lg font-semibold">Total Hours: <span class="font-extrabold">
+                        {{ totalHours($book->time_book_start, $book->time_book_end) }}
+                    </span></h2>
+
+                <section class="flex justify-end items-end md:gap-x-3 flex-col md:flex-row">
+                    {{-- <form action="{{ route('book.payment.decision', $book) }}" method="POST">
+                        @csrf
+                        <button type="submit" --}}
+
+                    <a href="{{ route('book.payment', $book->id) }}"
+                        class="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">
+                        <svg class="hidden w-4 h-4 sm:inline-block" fill="none" stroke="currentColor" stroke-width="1.5"
+                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18">
+                            </path>
+                        </svg>
+
+                        <span>
+                            Back
+                        </span>
+                    </a>
+
+                    <button type="button"
+                    data-modal-toggle="popup-modal"
+                        class="w-fit mr-2 focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2.5 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+                        Cancel
+                    </button>
+                    {{-- </button> --}}
+                    {{-- </form> --}}
+                    <form action="{{ route('payment.stripe.v3', $book) }}" method="POST">
+                        @csrf
+                        @include('components.form-button-submit-auth', ['name' => 'Checkout'])
+                    </form>
+                    {{-- <button type="submit"
+                        class="my-2 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-200 dark:focus:ring-blue-900 font-medium rounded text-sm px-5 py-2.5 inline-flex justify-center w-full text-center">
+                        Checkout
+                    </button> --}}
+                </section>
             </div>
         </div>
-
-    </div> --}}
-
-
-    {{-- V3 --}}
-    <section class="m-5">
-        <!-- Use action="/create-checkout-session.php" if your server is PHP based. -->
-        <form action="/create-checkout-session" method="POST">
-            @csrf
-            <button type="submit">Checkout</button>
-        </form>
-        @push('scripts')
-            {{-- <script type="text/javascript" src="https://js.stripe.com/v2/"></script> --}}
-            <script src="https://js.stripe.com/v3/"></script>
-            <script type="text/javascript">
-                var stripe = Stripe('pk_test_3pATxw9SDqXlqLsiJiTML92x');
-                var elements = stripe.elements({
-                    clientSecret: 'pi_1FdzqcJWVUQxk1bYUq9TGPd1_secret_v8vRm1D9Cp0kFWmSNgRcdcmHQ',
-                });
-                var paymentElement = elements.create('payment');
-                paymentElement.mount('#payment-element');
-            </script>
-            {{-- <script type="text/javascript">
-                $(function() {
-
-                    /*------------------------------------------
-                    --------------------------------------------
-                    Stripe Payment Code
-                    --------------------------------------------
-                    --------------------------------------------*/
-
-                    var $form = $(".require-validation");
-
-                    $('form.require-validation').bind('submit', function(e) {
-                        var $form = $(".require-validation"),
-                            inputSelector = ['input[type=email]', 'input[type=password]',
-                                'input[type=text]', 'input[type=file]',
-                                'textarea'
-                            ].join(', '),
-                            $inputs = $form.find('.required').find(inputSelector),
-                            $errorMessage = $form.find('div.error'),
-                            valid = true;
-                        $errorMessage.addClass('hide');
-
-                        $('.has-error').removeClass('has-error');
-                        $inputs.each(function(i, el) {
-                            var $input = $(el);
-                            if ($input.val() === '') {
-                                $input.parent().addClass('has-error');
-                                $errorMessage.removeClass('hide');
-                                e.preventDefault();
-                            }
-                        });
-
-                        if (!$form.data('cc-on-file')) {
-                            e.preventDefault();
-                            Stripe.setPublishableKey($form.data('stripe-publishable-key'));
-                            Stripe.createToken({
-                                number: $('.card-number').val(),
-                                cvc: $('.card-cvc').val(),
-                                exp_month: $('.card-expiry-month').val(),
-                                exp_year: $('.card-expiry-year').val()
-                            }, stripeResponseHandler);
-                        }
-
-                    });
-
-                    /*------------------------------------------
-                    --------------------------------------------
-                    Stripe Response Handler
-                    --------------------------------------------
-                    --------------------------------------------*/
-                    function stripeResponseHandler(status, response) {
-                        if (response.error) {
-                            $('.error')
-                                .removeClass('hide')
-                                .find('.alert')
-                                .text(response.error.message);
-                        } else {
-                            /* token contains id, last4, and card type */
-                            var token = response['id'];
-
-                            $form.find('input[type=text]').empty();
-                            $form.append("<input type='hidden' name='stripeToken' value='" + token + "'/>");
-                            $form.get(0).submit();
-                        }
-                    }
-
-                });
-            </script> --}}
-        @endpush
+        @include('components.delete-modal')
     </section>
 @endsection
