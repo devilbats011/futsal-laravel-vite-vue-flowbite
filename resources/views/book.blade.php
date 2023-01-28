@@ -7,7 +7,7 @@
         <div class="m-5">
             {{-- {{ $court }} --}}
             {{-- {{ $books}} --}}
-            <a href="{{ route('courts.index') }}"
+            {{-- <a href="{{ route('courts.index') }}"
                 class="inline-flex items-center font-medium text-blue-600 dark:text-blue-500 hover:underline">
                 <svg aria-hidden="true" class="ml-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg">
@@ -16,9 +16,10 @@
                         clip-rule="evenodd"></path>
                 </svg>
                 VIEW OTHER COURTS
-            </a>
+            </a> --}}
+            @include('components.view-courts')
 
-            <h1 class="pt-2 pb-8 text-xl">
+            <h1 class="mt-2 pt-2 pb-8 text-xl">
                 Booking Court {{ $court->number }}
                 <hr class="border-black">
             </h1>
@@ -59,11 +60,11 @@
             </section>
             <section class="pt-6">
 
-
                 {{-- ? https://laravel.com/docs/9.x/requests#retrieving-old-input --}}
-                {{-- todo: Put old input name|email|number..etc if there are more.. --}}
                 <book
                     old-phone-no="{{ old('phone_no') }}"
+                    old-start="{{old('time_book_start')}}"
+                    old-end="{{old('time_book_end')}}"
                     old-name="{{ old('name') }}"
                     old-email="{{ old('email') }}"
                     errors="{{ $errors }}"
@@ -77,7 +78,6 @@
             </section>
 
         </div>
-
 
     </main>
 @endsection

@@ -3,23 +3,29 @@
 @section('content-play')
     <div class="flex justify-center items-center flex-col relative w-10/12 mx-auto gap-y-8 mt-10">
 
+        @include('components.header',['colored_name'=>'Profile'])
 
         <div class="w-full bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700">
             <div class="flex justify-end px-4 pt-9">
             </div>
 
-            <div class="flex flex-col items-center pb-10">
+            <div class="flex flex-col items-center pb-10 space-y-1">
                 <img class="w-24 h-24 mb-3 rounded-full shadow-lg" src="{{ URL('avatar-futsal-1.jpg') }}" alt="Avatar image" />
-                <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white"> {{ Auth::user()->name }} </h5>
-                <span class="text-sm text-gray-500 dark:text-gray-400"> status: {{ Auth::user()->role }} </span>
+                <h3 class="mb-1 text-xl font-medium text-gray-900 dark:text-white p-1"  > {{ $user->name }} </h3>
+                </h5>
+                <h5 class="text-sm md:text-base text-gray-500 dark:text-gray-400"> Email: <span  class="p-2" >{{ $user->email }}</span>
+                </h5>
+                <h5 class="text-sm md:text-base text-gray-500 dark:text-gray-400"> Phone No:
+                    <span  class="p-2">{{ $user->phone_no ?? 'No Info' }}</span> </h5>
 
+                {{-- <div class="pt-4"><button class="border py-1 px-4 rounded-lg">Edit</button></div> --}}
             </div>
         </div>
 
 
         <div
             class="w-full p-4 text-center bg-white border rounded-lg shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700">
-            <h5 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white"> History Booked </h5>
+            @include('components.header',['normal_name'=> 'History','colored_name'=>'Booked','direction'=>'reverse'])
             <div class="mb-5 text-base text-gray-500 sm:text-lg dark:text-gray-400">
                 {{-- Stay up to date and move work forward with Flowbite on iOS & Android. Download the app today. --}}
 
@@ -55,7 +61,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($books as $book)
+                            @forelse ($books as $book)
                                 <tr class="bg-white border dark:bg-gray-800 dark:border-gray-700 ">
                                     <th scope="row"
                                         class="pl-[3.6rem] py-4 font-medium whitespace-nowrap dark:text-white border">
@@ -84,7 +90,11 @@
                                         {{ $book->state }}
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr class="text-center">
+                                    <td colspan="8" class="py-3 text-lg font-semibold">Empty..</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

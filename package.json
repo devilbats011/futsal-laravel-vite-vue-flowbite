@@ -20,6 +20,7 @@
         "vue": "^3.2.37"
     },
     "dependencies": {
-        "moment": "^2.29.4"
+        "moment": "^2.29.4",
+        "validator": "^13.7.0"
     }
 }

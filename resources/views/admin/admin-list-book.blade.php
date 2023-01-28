@@ -174,7 +174,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($books as $book)
+                                    @forelse ($books as $book)
                                         <tr class="bg-white border dark:bg-gray-800 dark:border-gray-700 ">
                                             <th scope="row"
                                                 class="pl-[3.6rem] py-4 font-medium whitespace-nowrap dark:text-white border">
@@ -203,7 +203,11 @@
                                                 {{ $book->state }}
                                             </td>
                                         </tr>
-                                    @endforeach
+                                        @empty
+                                        <tr class="text-center">
+                                         <td colspan="8" class="py-3 text-lg font-semibold">Empty..</td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>

@@ -18,7 +18,8 @@
                         {{-- <futsal-component test="{{$name}}" ></futsal-component> --}}
                         <hr class="my-3">
 
-                        @include('components.view-courts')
+                        <div class="flex justify-center"> @include('components.view-courts') </div>
+
                         <hr class="my-3">
                         <div class="text-justify">
 
