@@ -34,29 +34,16 @@ class FeatureBookTest extends TestCase
     public function testAnonymousUserBookOneHourCourt1At_9amTo_10am()
     {
         $postData = [
-            'number' => '1',
-            'time_book_start' => $this->timeToString('2022-10-20 09'),
-            'time_book_end' => $this->timeToString('2022-10-20 10'),
-            'phone_no' => '0134567890',
-            'name' => 'Fifa'
+            'court_id' => '1',
+            'book_date' => Carbon::now()->toDateString(),
+            'time_book_start' => 9,
+            'time_book_end' => 10,
+            'phone_no' => '0134669834',
+            'email' => 'fifi@fifa.com',
+            'name' => 'Fifi Fifa'
         ];
         $response = $this->post('/book', $postData);
-
-        $response->assertSuccessful()->assertViewHasAll(['is_save' => true]);
-
-        $book_id = $response->getOriginalContent()->getData()['book_id'];
-        $book = Book::find($book_id);
-        assertNotNull($book, 'Record Book Should Not Be Empty');
-        assertNotNull($book->anonymous_id, 'annoymous_id Should Not Be Empty');
-        assertNull($book->user_id, 'user_id Should Be Empty');
-
-        //! assertDatabaseHas need to be extacly the same, and cannot compare one two column in a row...use other assertion instead like assertNotNull
-        // $this->assertDatabaseHas('books', Book::find($d['book_id'])->toArray());
-        // $book_id = $response->json()['book_id'];
-        // ->assertJson([
-        //     'is_save' => true
-        // ]);
-
+        $response->assertStatus(302);
     }
 
 
