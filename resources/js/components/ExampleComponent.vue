@@ -22,8 +22,5 @@
                 default: 'default-'
             },
         },
-        mounted() {
-            console.log('Component mounted.',this.test);
-        }
     }
 </script>

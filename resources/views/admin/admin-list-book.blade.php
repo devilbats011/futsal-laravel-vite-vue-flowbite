@@ -68,62 +68,7 @@
                                         <span class="sr-only">Search</span>
                                     </a>
                                     {{-- <a id="filter-a" hidden>SEARCH</a> --}}
-                                    @push('scripts')
-                                        <script>
-                                            function hideDropDownMenu(e) {
-                                                const buttonFilterDropDown = document.getElementById('dropdown-button');
-                                                buttonFilterDropDown.querySelector('p').innerText = e.target.innerText;
-                                                const filterDropDown = document.getElementById('filter-dropdown');
-                                                const dropdown = new Dropdown(filterDropDown, buttonFilterDropDown);
-                                                dropdown.hide();
-                                                getFilterInfo();
-                                            }
 
-                                            function searchChange() {
-                                                getFilterInfo();
-                                            }
-
-                                            function getFilterInfo() {
-                                                const filterOptionArray = ['Court Number', 'Name', 'Email', 'Phone', 'Book Date'];
-                                                const buttonFilterDropDown = document.getElementById('dropdown-button');
-                                                let filter = buttonFilterDropDown.querySelector('p').innerText;
-                                                const filterResult = filterOptionArray.find((opt) => {
-                                                    if (opt.toLowerCase() == filter.toLowerCase()) return true;
-                                                })
-
-                                                if (filterResult) {
-                                                    const a = document.getElementById('submit-id');
-                                                    var url = new URL(window.location.href);
-                                                    console.log('%cadmin-list-book.blade.php line:94 url', 'color: #007acc;', url);
-                                                    const inputEl = document.getElementById('search-dropdown');
-                                                    url.searchParams.set('filter', filterResult);
-                                                    url.searchParams.set('data', inputEl.value);
-                                                    switch (filterResult.toLowerCase()) {
-                                                        case 'court number':
-                                                            url.searchParams.set('data_type', 'number');
-                                                            break;
-                                                        case 'name':
-                                                            url.searchParams.set('data_type', 'name');
-                                                            break;
-                                                        case 'phone':
-                                                            url.searchParams.set('data_type', 'phone_no');
-                                                            break;
-                                                        case 'email':
-                                                            url.searchParams.set('data_type', 'email');
-                                                            break;
-                                                        case 'book date':
-                                                            url.searchParams.set('data_type', 'book_date');
-                                                            break;
-                                                        default:
-                                                            break;
-                                                    }
-                                                    url.searchParams.set('page', 1);
-
-                                                    a.href = url;
-                                                }
-                                            }
-                                        </script>
-                                    @endpush
                                 </div>
                             </div>
                         </form>
@@ -147,6 +92,17 @@
                                 style="border-collapse:collapse;">
                                 <thead class="text-xs text-white uppercase bg-blue-600">
                                     <tr>
+                                        <th scope="col" class="pl-4 py-3 text-center border" width="140px">
+                                            Counter
+                                        </th>
+
+
+                                        <th scope="col" class="text-center border">
+                                            Payment Status
+                                        </th>
+                                        <th scope="col" class="text-center border">
+                                            Payment Method
+                                        </th>
                                         <th scope="col" class="pl-4 py-3 border" width="140px">
                                             Court Number
                                         </th>
@@ -176,10 +132,36 @@
                                 <tbody>
                                     @forelse ($books as $book)
                                         <tr class="bg-white border dark:bg-gray-800 dark:border-gray-700 ">
-                                            <th scope="row"
+                                            <td class="text-center">
+                                                @if (($book->payment->payment_status ?? '') == 'counter')
+                                                    <button
+                                                        onclick="counterVerifyHandler({{ $book->id }})"
+                                                        type="button"
+                                                        data-modal-toggle="counter-popup-modal"
+                                                        class="text-sm mt-1 bg-blue-600 hover:bg-blue-800 text-white rounded-lg px-2 py-2">
+                                                        verify
+                                                    </button>
+                                                @else
+                                                    <svg fill="none" class="w-5 h-5 m-auto text-slate-400"
+                                                        stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
+                                                        xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M6 18L18 6M6 6l12 12"></path>
+                                                    </svg>
+                                                @endif
+
+                                            </td>
+                                            <td class="border text-center">
+                                                {{ $book->payment->payment_status ?? '' }}
+                                            </td>
+                                            <td class="text-center">
+                                                {{ $book->payment->payment_method ?? '' }}
+                                            </td>
+
+                                            <td scope="row"
                                                 class="pl-[3.6rem] py-4 font-medium whitespace-nowrap dark:text-white border">
                                                 {{ $book->court?->number ?? '' }}
-                                            </th>
+                                            </td>
                                             <td class="px-6 py-4 ">
                                                 {{ $book->anonymous->name }}
                                             </td>
@@ -203,13 +185,14 @@
                                                 {{ $book->state }}
                                             </td>
                                         </tr>
-                                        @empty
+                                    @empty
                                         <tr class="text-center">
-                                         <td colspan="8" class="py-3 text-lg font-semibold">Empty..</td>
+                                            <td colspan="8" class="py-3 text-lg font-semibold">Empty..</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
+
                         </div>
                         {{ $books->links() }}
 
@@ -218,18 +201,84 @@
                 </section>
 
 
-
-
-
-
             </div>
         </div>
-        @pushOnce('scripts')
-            {{-- <script src="https://unpkg.com/flowbite@1.5.5/dist/flowbite.js"></script> --}}
-            {{-- <script>
 
-            </script> --}}
-        @endPushOnce
+        @include('components.admin-counter-modal')
+
+
+        @push('scripts')
+        <script>
+            function hideDropDownMenu(e) {
+                const buttonFilterDropDown = document.getElementById('dropdown-button');
+                buttonFilterDropDown.querySelector('p').innerText = e.target.innerText;
+                const filterDropDown = document.getElementById('filter-dropdown');
+                const dropdown = new Dropdown(filterDropDown, buttonFilterDropDown);
+                dropdown.hide();
+                getFilterInfo();
+            }
+
+            function searchChange() {
+                getFilterInfo();
+            }
+
+            function getFilterInfo() {
+                const filterOptionArray = ['Court Number', 'Name', 'Email', 'Phone', 'Book Date'];
+                const buttonFilterDropDown = document.getElementById('dropdown-button');
+                let filter = buttonFilterDropDown.querySelector('p').innerText;
+                const filterResult = filterOptionArray.find((opt) => {
+                    if (opt.toLowerCase() == filter.toLowerCase()) return true;
+                })
+
+                if (filterResult) {
+                    const a = document.getElementById('submit-id');
+                    var url = new URL(window.location.href);
+                    const inputEl = document.getElementById('search-dropdown');
+                    url.searchParams.set('filter', filterResult);
+                    url.searchParams.set('data', inputEl.value);
+                    switch (filterResult.toLowerCase()) {
+                        case 'court number':
+                            url.searchParams.set('data_type', 'number');
+                            break;
+                        case 'name':
+                            url.searchParams.set('data_type', 'name');
+                            break;
+                        case 'phone':
+                            url.searchParams.set('data_type', 'phone_no');
+                            break;
+                        case 'email':
+                            url.searchParams.set('data_type', 'email');
+                            break;
+                        case 'book date':
+                            url.searchParams.set('data_type', 'book_date');
+                            break;
+                        default:
+                            break;
+                    }
+                    url.searchParams.set('page', 1);
+
+                    a.href = url;
+                }
+            }
+
+
+
+            function counterVerifyHandler(bookId) {
+                    setBookToFormAdminCounterVerify(bookId);
+            }
+
+            function setBookToFormAdminCounterVerify(_bookId) {
+                    //* form-admin-counter-verify-id from include('components.admin-counter-modal')
+                    const form = document.querySelector('#form-admin-counter-verify-id');
+                    let splitAction = String(form.action).split('/');
+                    splitAction.pop();
+                    splitAction.push(_bookId);
+                    let actionJoined = splitAction.join('/');
+                    form.action = actionJoined;
+            }
+
+        </script>
+    @endpush
 
     </section>
 @endsection

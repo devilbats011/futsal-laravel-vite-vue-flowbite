@@ -105,11 +105,8 @@ export default {
                 },
                 body: JSON.stringify({ secret: this.secretAdminCode })
             }).then(res => res.json());
-            // console.log(books);
             this.books = books.data;
         }
-
-        // console.log(this.secretAdminCode,document.location);
 
     },
     data() {

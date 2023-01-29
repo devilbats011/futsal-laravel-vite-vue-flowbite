@@ -1,10 +1,8 @@
 @extends('layouts.play')
 
 @section('content-play')
-    <div class="py-5 px-6">
-        {{-- !  - ADDEDD 'pending' for testing purpose --}}
+    <main class="py-5 px-6">
         @if (in_array($book->payment->payment_status, ['counter', 'success']) )
-            <h1> </h1>
             <section class="pb-1 space-y-1">
                 <div
                     class="bg-green-100 text-green-800 text-xs font-medium inline-flex items-center px-2.5 py-2 rounded mr-2 dark:bg-gray-700 dark:text-gray-400 border border-green-500">
@@ -79,7 +77,7 @@
         @endif
 
 
-    </div>
+    </main>
 @endsection
 
 </html>

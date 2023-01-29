@@ -15,7 +15,6 @@
 
                     <div class="space-y-6 py-8 text-base leading-7 text-gray-600">
                         {{-- https://stackoverflow.com/questions/51366437/best-practice-to-pass-data-from-laravel-to-vue-component --}}
-                        <futsal-component test="{{$name}}" ></futsal-component>
                         <p>An advanced online playground for Tailwind CSS, including support for things like:</p>
                         <ul class="space-y-4">
                             <li class="flex items-center">

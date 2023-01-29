@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateBookRequest;
-use App\Http\Requests\UpdateBookRequest;
 use Stripe;
 use App\Models\Book;
 use App\Models\User;
 use App\Models\Court;
+use App\Jobs\SendEmail;
 use App\Models\Payment;
 use App\Models\Anonymous;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Jobs\CancelBookingJob;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\BookCollection;
-use App\Jobs\SendEmail;
 use Illuminate\Support\Facades\Session;
+use App\Http\Requests\CreateBookRequest;
+use App\Http\Requests\UpdateBookRequest;
+use Illuminate\Support\Facades\Validator;
 
 class BookController extends Controller
 {
@@ -51,7 +52,7 @@ class BookController extends Controller
     {
         $books = Book::Where('book_date', $book_date)
             ->where('court_id', $court->id)
-            ->where('state','<>','empty')
+            ->where('state', '<>', 'empty')
             ->with(['court' => function ($query) {
                 $query->select('id', 'number');
             }])
@@ -182,49 +183,73 @@ class BookController extends Controller
      **/
     public function paymentSuccess(Book $book, Request $r)
     {
-        // dd($book,$data); //test
         try {
-            // todo: this emailjob should move to POST not inside GET !
-            //! $emailJob = (new SendEmail($book))->delay(Carbon::now()->addSeconds(10));
-            //! dispatch($emailJob);
-
-            if (!$r->session_id) {
+            if ($this->successPayAtCounter($book, $r))
                 return view('success', compact('book'));
-            }
 
-            $stripe = new Stripe\StripeClient('sk_test_wVr5bhfz0lPTQb6uG2RxsojZ');
-            $session = $stripe->checkout->sessions->retrieve($r->session_id);
-            // $customer = $stripe->customers->retrieve($session->customer);
-
-            abort_if(!$session,500);
-
-            $book->payment->update(['payment_status' => 'success']);
-            return view('success', compact('book'));
+            if ($this->successPaidStripeOnline($r, $book))
+                return view('success', compact('book'));
         } catch (\Throwable $e) {
-            abort(500,$e->getMessage());
+            abort(500, $e->getMessage());
             // http_response_code(500);
             // echo json_encode(['error' => $e->getMessage()]);
         }
     }
 
+    private function sentEmailBookingNumber(Book $book)
+    {
+        if (!$book->is_book_number_email_sent) {
+            $isBookUpdate = $book->update(['is_book_number_email_sent' => true]);
+            $emailJob = (new SendEmail($book))->delay(Carbon::now()->addSeconds(10));
+            dispatch($emailJob);
+        }
+    }
+
+    private function successPayAtCounter(Book $book, Request $r)
+    {
+        if (!$r->session_id) {
+            if ($book->state == 'booked') {
+                $this->sentEmailBookingNumber($book);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function successPaidStripeOnline(Request $r, Book $book)
+    {
+        $stripe = new Stripe\StripeClient('sk_test_wVr5bhfz0lPTQb6uG2RxsojZ');
+        $session = $stripe->checkout->sessions->retrieve($r->session_id);
+        // $customer = $stripe->customers->retrieve($session->customer);
+        abort_if(!$session, 500);
+        $book->update(['state' => 'booked']);
+        $book->payment->update(['payment_status' => 'success']);
+        if ($book->state == 'booked') {
+            $this->sentEmailBookingNumber($book);
+        }
+        return true;
+        // return view('success', compact('book'));
+    }
+
     # GET route('payment.cancel);
     public function paymentCancel(Request $r, Book $book)
     {
+
         try {
             if (!$r->session_id) {
 
-                if($book->payment->payment_status == 'pending') {
-                    $book->payment->update(['payment_status'=>'fail']);
-                    $u = $book->update(['state'=>'empty']);
+                if ($book->payment->payment_status == 'pending') {
+                    $book->payment->update(['payment_status' => 'fail']);
+                    $u = $book->update(['state' => 'empty']);
                     // $u = $book->delete();
-                //    dd($u);
+                    //    dd($u);
                 }
 
 
                 return view('cancel', compact('book'));
             }
         } catch (\Throwable $e) {
-            abort(500,$e->getMessage());
+            abort(500, $e->getMessage());
             // http_response_code(500);
             // echo json_encode(['error' => $e->getMessage()]);
         }
@@ -254,9 +279,6 @@ class BookController extends Controller
 
             $payment_status = $book->payment->payment_status;
             if (in_array($payment_status, ['counter', 'success'])) {
-                $emailJob = (new SendEmail($book))->delay(Carbon::now()->addSeconds(10));
-                dispatch($emailJob);
-                // Session::flash('message', "payment status : {$payment_status}");
                 return redirect()->route('payment.success', $book);
             }
         }
@@ -267,7 +289,7 @@ class BookController extends Controller
             $payment->payment_method = 'counter';
             $payment->payment_status = 'counter';
             // $payment->payment_status = 'pending';
-            $book->update(['state'=>'booked']);
+            $book->update(['state' => 'booked']);
             $book->payment()->save($payment);
             Session::flash('message', "Booking Success!");
             return redirect()->route('payment.success', $book);
@@ -313,6 +335,14 @@ class BookController extends Controller
     public function stripe(Book $book)
     {
         abort_if($book->state != 'pending', 403, 'Forbidden');
+
+        if (!$book->is_book_on_cancel) {
+            $book->update(['is_book_on_cancel' => true]);
+            $cancelBooking = (new CancelBookingJob($book))->delay(Carbon::now()->addMinutes(15)); //!add seconds for testing only : ->addSeconds(10)); // ->addMinutes(15));
+            dispatch($cancelBooking);
+        }
+
+        session()->flash('message','Automatically cancel booking after 15 mins if there is no action..');
         return view('stripe', compact('book'));
     }
 

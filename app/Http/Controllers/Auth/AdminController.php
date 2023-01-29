@@ -8,6 +8,7 @@ use App\Models\Court;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
@@ -28,6 +29,20 @@ class AdminController extends Controller
         return view('admin.admin-courts', compact('courts'));
     }
 
+    #PUT
+    public function adminCounterVerify(Book $book, Request $request) {
+
+        abort_if(!$book,404);
+
+        $v = Validator::make($request->all(),[
+            'payment_status' => ['required','in:success'],
+        ])->validate();
+
+       $book->payment->update($v);
+       session()->flash('message','counter verify!');
+       return back();
+        // return view('admin.admin-counter');
+    }
 
 
     public function index()

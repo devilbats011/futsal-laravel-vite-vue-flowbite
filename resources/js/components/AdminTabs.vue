@@ -41,6 +41,7 @@ export default {
                 { tab: 'Courts', url: '/admin/courts' , subRoute: ['courts.create', 'courts.edit'] },
                 { tab: 'Track Book', url: '/admin' },
                 { tab: 'List Book', url: '/admin/sandbox' },
+                // { tab: 'Counter', url: '/admin/counter' },
             ],
             origin: '',
         }

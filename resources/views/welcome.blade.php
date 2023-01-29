@@ -14,8 +14,7 @@
                         <img src="{{ URL('futsal-logo.jpg') }}" alt="futsal-logo">
                     </div>
                     <div class=" py-8 text-base leading-7 text-gray-600">
-                        {{-- https://stackoverflow.com/questions/51366437/best-practice-to-pass-data-from-laravel-to-vue-component --}}
-                        {{-- <futsal-component test="{{$name}}" ></futsal-component> --}}
+                        {{--? https://stackoverflow.com/questions/51366437/best-practice-to-pass-data-from-laravel-to-vue-component --}}
                         <hr class="my-3">
 
                         <div class="flex justify-center"> @include('components.view-courts') </div>

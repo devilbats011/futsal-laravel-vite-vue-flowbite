@@ -8,7 +8,7 @@ import "./bootstrap";
 import "flowbite";
 import { createApp } from "vue";
 import defaultComponent from "./components/ExampleComponent.vue";
-import loginComponent from "./components/Login.vue";
+// import loginComponent from "./components/Login.vue";
 import courtComp from "./components/Courts.vue";
 import bookListComp from "./components/BookList.vue";
 import bookComp from "./components/Book.vue";
@@ -26,7 +26,6 @@ const addGlobalHelperToVueApp = () => {
 
 const route = () => {
     let url = window.location.pathname;
-    // console.log(url); //temporary..
 
     let URLS_ROUTE = [];
     URLS_ROUTE["login"] = { pathname: "/login" };

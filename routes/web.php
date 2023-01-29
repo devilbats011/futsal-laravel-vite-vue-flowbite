@@ -91,16 +91,18 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::controller(App\Http\Controllers\AdminController::class)->group(function () {
+// Route::controller(App\Http\Controllers\AdminController::class)->group(function () {
     Route::prefix('admin')->group(function () {
         Route::name('admin.')->group(function () {
             Route::get('/', [App\Http\Controllers\Auth\AdminController::class, 'index'])->name('home');
             Route::get('/courts', [App\Http\Controllers\Auth\AdminController::class, 'adminCourts'])->name('courts');
             Route::get('/sandbox', [App\Http\Controllers\Auth\AdminController::class, 'sandbox'])->name('sandbox');
+            Route::put('/counter-verify/{book}', [App\Http\Controllers\Auth\AdminController::class, 'adminCounterVerify'])->name('counter-verify');
+
             // Route::get('/log', [App\Http\Controllers\Auth\AdminController::class, 'log'])->name('log');
         });
     });
-});
+// });
 
 Route::controller(App\Http\Controllers\UserController::class)->group(function () {
     Route::prefix('home')->group(function () {

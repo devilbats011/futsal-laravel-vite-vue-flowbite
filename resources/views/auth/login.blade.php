@@ -37,7 +37,7 @@
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                             required> --}}
 
-                        @include('components.form-input-auth', ['title' => 'Password','type' => 'password','input' => 'password','value' => 'password','placeholder' => ' '])
+                        @include('components.form-input-auth', ['title' => 'Password','type' => 'password','input' => 'password' ,'placeholder' => 'Goal-password96'])
                         @error('password')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>

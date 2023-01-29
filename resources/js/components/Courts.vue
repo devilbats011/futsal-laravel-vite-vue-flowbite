@@ -65,9 +65,6 @@ export default {
         routebook: String,
         courts: String
     },
-    mounted() {
-        console.log(this.routebook, "-rr-", this.courtsParse);
-    },
     computed: {
         courtsParse() {
             return JSON.parse(this.courts);
